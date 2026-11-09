@@ -5,7 +5,7 @@
 ![Nix](https://img.shields.io/badge/Nix-flake-5277c3?logo=nixos&logoColor=white)
 ![Status](https://img.shields.io/badge/status-in%20development-orange)
 
-A top-down survival shooter made with [LÖVE](https://love2d.org/). Clear a house of zombies, wave after wave, with a single gun and limited ammo.
+A top-down horror shooter made with [LÖVE](https://love2d.org/). You wake up in a dark, unknown place with only a flashlight, and the only way out is forward.
 
 📄 See the [Game Design Document](docs/GDD.md) for the design.
 
@@ -70,10 +70,12 @@ stylua --check .  # or `stylua .` to format
 
 Under consideration, not yet part of the design:
 
-- 🔫 **Finding a shotgun.** The player starts with the handgun and finds a shotgun later on.
+- 🔫 **Finding a shotgun.** A second weapon, found after the handgun.
 - 🧪 **Zombie variants by recoloring.** One zombie sprite, with each type getting its own color (a tint or a shader) and scale, so new types need no new art.
 - 🍎 **A macOS build.** Built from LÖVE's official `love.app` like the Windows and Linux ones. It would not be signed, so macOS would ask players to allow it by hand.
-- 🔦 **A dark house.** The house stays in darkness and the player only sees what the flashlight and a few fixed lights (lamps, windows) reveal. This adds tension and gives assets from different sources a unified look.
+- 🔋 **Pickups.** Batteries for the flashlight, health and ammo, found along the way.
+- 🚪 **The ending.** Either the player escapes the dark place, or wakes up.
+
 ## 🙏 Credits
 
 All art and audio come from free third-party assets. Each one is credited here with its author, source and license.

@@ -2,42 +2,62 @@
 
 | | |
 |---|---|
-| **Genre** | Top-down survival shooter |
+| **Genre** | Top-down horror shooter |
 | **Engine** | LÖVE 11.5 (Lua) |
-| **Scope** | Small to medium, single player |
+| **Scope** | Small, single player, about 15–20 minutes |
 
 ## 1. Vision
 
-A survivor has to clear a house overrun by zombies, wave after wave. The scope stays small to medium, so that everything in the game is finished and polished.
+Someone wakes up in a dark, unknown place, with no idea how they got there, and the only way is forward. The game is horror and suspense first: darkness and sound build the tension, and the player still has to fight to get through.
 
-## 2. Player
+The art stays simple on purpose. An empty place made only of floors, walls and doors feels wrong, and that emptiness is part of the mood. The game is carried by its systems (light, sound, game feel) more than by its art.
+
+The scope stays small, so that everything in the game is finished and polished.
+
+## 2. Structure
+
+- The game is a single run forward through the place, not waves in an arena.
+- It opens with a short message: the player has just appeared there and knows nothing else.
+- At first there are no zombies, only their sounds.
+- Seeing the first zombie means running the other way, and that escape leads to the handgun. From then on the player can fight back.
+- Dying restarts the game from the beginning.
+
+## 3. Player
 
 - Moves with WASD. The torso faces the mouse cursor and the feet follow the movement: walking, walking backwards or strafing.
-- Holds either the weapon or the flashlight, and switches between them with `Q`.
-- Cannot shoot while holding the flashlight, so seeing and defending become a trade-off.
+- Starts with only the flashlight.
+- Once the handgun is found, holds either the handgun or the flashlight, and switches between them with `Q`.
+- Survives five zombie hits.
 
-## 3. Weapon
+## 4. Light
 
-- The player starts with a handgun.
+- The place is dark. The flashlight is the only real source of light.
+- The flashlight casts a cone of light in the direction the player aims.
+- Its battery runs down, and the light flickers more and more as it gets low.
+- With the handgun out, the player is in the dark: only the flash of each shot lights the surroundings for an instant.
+- Seeing and defending become a trade-off: the player cannot light the way and shoot at the same time.
+
+## 5. Weapon
+
+- The handgun is found early on, while escaping the first zombie.
 - Limited ammo, with reloading.
 - Reloading is manual, with `R`, and never automatic: the player has to remember to reload.
 
-## 4. Enemies
+## 6. Enemies
 
-- Zombies, arriving in waves.
+- Zombies. They are heard before they are seen.
 - A zombie takes three handgun shots to kill, and fades out when it dies.
 - Up close, a zombie swings at the player. Stepping back before the arms close dodges the hit.
-- The player survives five zombie hits.
-- They enter the house through doors and windows.
-- They navigate the house toward the player using a flow field.
+- Zombies are slower than the player, so running away is always an option.
+- They navigate toward the player using a flow field.
 
-## 5. World
+## 7. World
 
-- The setting is a house.
+- An unknown place made only of floors, walls and doors.
 - The map is larger than the screen, and a camera follows the player.
 - The map is built in [Tiled](https://www.mapeditor.org/) and loaded with a custom loader.
 
-## 6. Technical design
+## 8. Technical design
 
 - Design patterns come from Robert Nystrom's [*Game Programming Patterns*](https://gameprogrammingpatterns.com/).
 - A pattern is introduced only when the project's complexity calls for it, and it is documented here when that happens.
@@ -76,8 +96,8 @@ Rules:
 - Pushing a `v*` tag publishes a GitHub release with the builds.
 - The builds fuse the game into the official LÖVE binaries, pinned by checksum.
 
-## 7. Assets
+## 9. Assets
 
 - All art and audio are free third-party assets.
 - Every asset is credited in the README with its author, source and license.
-- The setting and tone will be defined by the assets found.
+- The art is kept simple: darkness, light and sound carry the mood.

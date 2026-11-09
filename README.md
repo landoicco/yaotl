@@ -7,9 +7,11 @@
 
 A top-down survival shooter made with [LÖVE](https://love2d.org/). Clear a house of zombies, wave after wave, with a single gun and limited ammo.
 
-*Yaotl* (Nahuatl, pronounced *YA-otl*) means "enemy" or "warrior".
-
 📄 See the [Game Design Document](docs/GDD.md) for the design.
+
+## 🪶 About the name
+
+*Yaotl* (pronounced *YA-otl*) is a Nahuatl word meaning **enemy**, and by extension **combat** or **war**. Some sources also translate it as **warrior**, which fits a game about a lone survivor facing a horde. See the entry in the [Gran Diccionario Náhuatl](https://gdn.iib.unam.mx/diccionario/yaotl/18899) (UNAM).
 
 ## 🚀 Running the game
 
@@ -45,7 +47,12 @@ Under consideration, not yet part of the design:
 - 🎨 **Art from [Riley Gombart](https://opengameart.org/users/rileygombart).** His animated survivor and zombie sprites have many states (idle, move, shoot, reload, melee), which fits a game where reloading matters.
 - 🧪 **Zombie variants by recoloring.** One zombie sprite, with each type getting its own color (a tint or a shader) and scale, so new types need no new art.
 - 🔦 **A dark house.** The house stays in darkness and the player only sees what the flashlight and a few fixed lights (lamps, windows) reveal. This adds tension and gives assets from different sources a unified look.
+- 🔁 **Flashlight or weapon.** The player switches between the flashlight and the weapon and cannot shoot while holding the flashlight, so seeing and defending become a trade-off.
 
 ## 🙏 Credits
 
 All art and audio come from free third-party assets. Each one is credited here with its author, source and license.
+
+| Asset | Author | Source | License |
+|---|---|---|---|
+| Survivor sprites | rileygombart | [Animated Top Down Survivor Player](https://opengameart.org/content/animated-top-down-survivor-player) | [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) |

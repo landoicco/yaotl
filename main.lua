@@ -1,44 +1,18 @@
--- Set window properties
-local windowWidth, windowHeight = 800, 600
-local playerSprite = love.graphics.newImage("survivor.png")
-local playerAngle = 0
-local playerSpeed = 2
-local projectiles = 0
-local projectileSpeed = 5
+local Player = require("src.player")
 
-love.window.setTitle("Puto el k lea esto")
-love.window.setMode(windowWidth, windowHeight, {
-    resizable = false,
-    vsync = 1
-})
+local player
 
--- This funtion is called one at the beginning of the game
+-- This function is called once at the beginning of the game
 function love.load()
-    setPlayerSpawnPosition()
+    -- Neutral floor tone so the dark sprites stay visible, until the map is drawn
+    love.graphics.setBackgroundColor(0.45, 0.45, 0.42)
+
+    local windowWidth, windowHeight = love.graphics.getDimensions()
+    player = Player.new(windowWidth / 2, windowHeight / 2)
 end
 
 function love.update(dt)
-
-    -- Move the player
-    if love.keyboard.isDown("w") then
-        player.y = player.y - playerSpeed
-    end
-    if love.keyboard.isDown("s") then
-        player.y = player.y + playerSpeed
-    end
-    if love.keyboard.isDown("a") then
-        player.x = player.x - playerSpeed
-    end
-    if love.keyboard.isDown("d") then
-        player.x = player.x + playerSpeed
-    end
-
-    -- Rotate player
-    local mouseX, mouseY = love.mouse.getPosition()
-    local distanceX = mouseX - player.x
-    local distanceY = mouseY - player.y
-    playerAngle = math.atan2(distanceY - player.h, distanceX - player.w)
-
+    player:update(dt)
 end
 
 function love.mousepressed(x, y, btn, istouch, presses)
@@ -49,24 +23,5 @@ end
 
 -- Callback function used to draw on screen every frame
 function love.draw()
-    love.graphics.draw(playerSprite, player.x, player.y, playerAngle)
-end
-
---[[
-    INIT FUNCTIONS
-]]
-
--- Define spawn position for the player
-function setPlayerSpawnPosition()
-    local playerHeight = playerSprite:getHeight()
-    local playerWidth = playerSprite:getWidth()
-
-    local playerXPos = (windowWidth / 2) - (playerWidth / 2)
-    local playerYPos = (windowHeight / 2) - (playerHeight / 2)
-
-    player = {}
-    player.x = playerXPos
-    player.y = playerYPos
-    player.w = playerWidth
-    player.h = playerHeight
+    player:draw()
 end

@@ -1,4 +1,4 @@
-local Animation = require("src.animation")
+local Animation = require("src.engine.animation")
 
 -- The survivor: moves with WASD, the torso faces the mouse cursor
 -- and the feet face the direction of movement

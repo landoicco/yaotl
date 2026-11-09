@@ -36,4 +36,5 @@ function love.draw()
     local weapon = player.weapon
     love.graphics.print(string.format("Ammo: %d / %d", weapon.magazine, weapon.reserve), 10, 10)
     love.graphics.print(string.format("Health: %d", player.health), 10, 30)
+    love.graphics.print(string.format("Battery: %d%%", math.ceil(player.flashlight.charge * 100)), 10, 50)
 end

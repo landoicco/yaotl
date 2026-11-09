@@ -143,9 +143,13 @@ function Player:shoot()
     self.spawnBullet(x, y, self.aimAngle)
 end
 
+function Player:isHoldingFlashlight()
+    return self.state == states.flashlight
+end
+
 -- Add the lights the player gives off this frame
 function Player:addLights(lights)
-    if self.state == states.flashlight then
+    if self:isHoldingFlashlight() then
         self.flashlight:addLights(lights)
     end
 end
@@ -203,6 +207,7 @@ function Player:update(dt)
 
     local lensX, lensY = self:torsoPoint(LENS_X, LENS_Y)
     self.flashlight:place(lensX, lensY, self.aimAngle, self.x, self.y)
+    self.flashlight:update(dt, self:isHoldingFlashlight())
 end
 
 -- Feet animation and angle from the movement relative to the aim

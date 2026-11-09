@@ -52,3 +52,7 @@ Under consideration, not yet part of the design:
 ## 🙏 Credits
 
 All art and audio come from free third-party assets. Each one is credited here with its author, source and license.
+
+| Asset | Author | Source | License |
+|---|---|---|---|
+| Survivor sprites | rileygombart | [Animated Top Down Survivor Player](https://opengameart.org/content/animated-top-down-survivor-player) | [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) |

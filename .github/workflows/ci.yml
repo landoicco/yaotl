@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+    tags: ["v*"]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: cachix/install-nix-action@v31
+      # Same tool versions as local, pinned by flake.lock
+      - name: luacheck
+        run: nix develop --command luacheck .
+      - name: StyLua
+        run: nix develop --command stylua --check .
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install squashfs-tools
+        run: sudo apt-get update && sudo apt-get install -y squashfs-tools
+      - name: Build
+        run: tools/build.sh
+      # One artifact per platform, so testing one does not download the others
+      # Windows uploads the folder: artifacts are zipped, and a zip inside a zip won't run
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaotl-windows
+          path: build/yaotl-windows/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaotl-linux
+          path: build/yaotl-linux.AppImage
+      # The release attaches the zip
+      - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
+        with:
+          name: release-windows
+          path: build/yaotl-windows.zip
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # Skips the unzipped Windows folder
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: "{yaotl-linux,release-windows}"
+          path: dist
+          merge-multiple: true
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes

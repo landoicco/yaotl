@@ -64,9 +64,17 @@ Rules:
 - A module moves into `engine/` only after the game has used it and it has proved to be generic.
 - Nothing is added to `engine/` that the game does not need.
 
+### Code quality
+
+- CI checks every pull request with luacheck (static analysis) and StyLua (formatting).
+- The Nix flake pins both tools, so local checks and CI run the same versions.
+
 ### Distribution
 
 - A CI pipeline builds executables of the game for Linux and Windows.
+- Every pull request uploads its builds as artifacts, so each feature can be tested as players will run it.
+- Pushing a `v*` tag publishes a GitHub release with the builds.
+- The builds fuse the game into the official LÖVE binaries, pinned by checksum.
 
 ## 7. Assets
 

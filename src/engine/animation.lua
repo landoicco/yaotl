@@ -10,11 +10,7 @@ local function buildFrames(definition)
     for i = 0, definition.frameCount - 1 do
         local column = i % columns
         local row = math.floor(i / columns)
-        frames[i + 1] = love.graphics.newQuad(
-            column * width, row * height,
-            width, height,
-            image:getDimensions()
-        )
+        frames[i + 1] = love.graphics.newQuad(column * width, row * height, width, height, image:getDimensions())
     end
     return frames
 end
@@ -32,6 +28,32 @@ function Animation.new(definition)
     self.duration = #self.frames / definition.fps
 
     return self
+end
+
+-- Load each definition's spritesheet once, from dir + sheet; fps defaults to defaultFps
+function Animation.loadDefinitions(dir, definitions, defaultFps)
+    for _, definition in pairs(definitions) do
+        definition.image = love.graphics.newImage(dir .. definition.sheet)
+        definition.fps = definition.fps or defaultFps
+    end
+    return definitions
+end
+
+-- One animation per definition, under the same names
+function Animation.newSet(definitions)
+    local set = {}
+    for name, definition in pairs(definitions) do
+        set[name] = Animation.new(definition)
+    end
+    return set
+end
+
+-- The animation to play next, restarted only when it differs from the current one
+function Animation.switch(current, nextAnimation)
+    if nextAnimation ~= current then
+        nextAnimation:reset()
+    end
+    return nextAnimation
 end
 
 -- A negative dt plays the animation backwards
@@ -62,9 +84,15 @@ end
 function Animation:draw(x, y, angle, scale)
     local definition = self.definition
     love.graphics.draw(
-        definition.image, self.frames[self:frameIndex()],
-        x, y, angle, scale, scale,
-        definition.originX, definition.originY
+        definition.image,
+        self.frames[self:frameIndex()],
+        x,
+        y,
+        angle,
+        scale,
+        scale,
+        definition.originX,
+        definition.originY
     )
 end
 

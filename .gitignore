@@ -1,5 +1,8 @@
 # Used for PR descriptions
 pr-body.md
 
+# Output of tools/build.sh
+build/
+
 # All assets, not all of them are used
 assets_local/

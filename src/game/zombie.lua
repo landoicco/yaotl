@@ -21,6 +21,7 @@ local FADE_DURATION = 0.3 -- seconds
 local SHEETS_DIR = "assets/sprites/zombie/"
 
 -- Layouts from tools/pack-sprites.sh; the origin is the center of the body
+-- stylua: ignore
 local ANIMATIONS = {
     idle = {
         sheet = "idle.png",
@@ -41,11 +42,8 @@ local ANIMATIONS = {
     },
 }
 
--- Load each spritesheet once, shared by every zombie
-for _, definition in pairs(ANIMATIONS) do
-    definition.image = love.graphics.newImage(SHEETS_DIR .. definition.sheet)
-    definition.fps = definition.fps or DEFAULT_FPS
-end
+-- Shared by every zombie
+Animation.loadDefinitions(SHEETS_DIR, ANIMATIONS, DEFAULT_FPS)
 
 -- target: x, y and takeHit(), usually the player
 function Zombie.new(x, y, target)
@@ -62,10 +60,7 @@ function Zombie.new(x, y, target)
     -- Whether the current swing already landed or missed
     self.hasHit = false
 
-    self.animations = {}
-    for name, definition in pairs(ANIMATIONS) do
-        self.animations[name] = Animation.new(definition)
-    end
+    self.animations = Animation.newSet(ANIMATIONS)
     self.animation = self.animations.idle
 
     return self
@@ -122,10 +117,7 @@ function Zombie:updateAttack(distance)
 end
 
 function Zombie:switchTo(animation)
-    if animation ~= self.animation then
-        animation:reset()
-        self.animation = animation
-    end
+    self.animation = Animation.switch(self.animation, animation)
 end
 
 function Zombie:draw()

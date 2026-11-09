@@ -32,6 +32,30 @@ Install [LÖVE 11.5](https://love2d.org/), then run from the project root:
 love .
 ```
 
+### 📦 Downloads
+
+Every pull request builds the game for Windows and Linux; the builds are under the run's *Artifacts* in the Actions tab. Tagged versions are published as [releases](https://github.com/landoicco/yaotl/releases).
+
+- **Windows:** extract the whole zip first, then run `yaotl.exe`; it does not run from inside the zip.
+- **Linux:** make the AppImage executable (`chmod +x yaotl-linux.AppImage`) and run it. It needs FUSE 2 (`libfuse2`).
+
+### 🛠️ Building
+
+`tools/build.sh` builds the same files into `build/`. It needs `curl`, `zip`, `unzip` and `squashfs-tools`. With Nix:
+
+```bash
+nix shell nixpkgs#zip nixpkgs#unzip nixpkgs#squashfsTools --command tools/build.sh
+```
+
+## 🔍 Checking the code
+
+CI rejects code that fails [luacheck](https://github.com/lunarmodules/luacheck) or [StyLua](https://github.com/JohnnyMorganz/StyLua). Both come with the Nix dev shell, at the same versions CI uses:
+
+```bash
+luacheck .
+stylua --check .  # or `stylua .` to format
+```
+
 ## 🎮 Controls
 
 | Action | Input |
@@ -48,6 +72,7 @@ Under consideration, not yet part of the design:
 
 - 🔫 **Finding a shotgun.** The player starts with the handgun and finds a shotgun later on.
 - 🧪 **Zombie variants by recoloring.** One zombie sprite, with each type getting its own color (a tint or a shader) and scale, so new types need no new art.
+- 🍎 **A macOS build.** Built from LÖVE's official `love.app` like the Windows and Linux ones. It would not be signed, so macOS would ask players to allow it by hand.
 - 🔦 **A dark house.** The house stays in darkness and the player only sees what the flashlight and a few fixed lights (lamps, windows) reveal. This adds tension and gives assets from different sources a unified look.
 ## 🙏 Credits
 

@@ -14,6 +14,7 @@ local DEFAULT_FPS = 15
 local SHEETS_DIR = "assets/sprites/player/"
 
 -- Layouts from tools/pack-sprites.sh; the origin is the center of the body
+-- stylua: ignore
 local ANIMATIONS = {
     flashlightIdle = {
         sheet = "flashlight_idle.png",
@@ -80,19 +81,8 @@ local HANDGUN_RESERVE = 36
 local FORWARD_LIMIT = math.pi / 4
 local BACKWARD_LIMIT = 3 * math.pi / 4
 
--- Load each spritesheet once, shared by every player
-for _, definition in pairs(ANIMATIONS) do
-    definition.image = love.graphics.newImage(SHEETS_DIR .. definition.sheet)
-    definition.fps = definition.fps or DEFAULT_FPS
-end
-
--- Switch to another animation, restarting it only when it actually changes
-local function switchTo(current, nextAnimation)
-    if current ~= nextAnimation then
-        nextAnimation:reset()
-    end
-    return nextAnimation
-end
+-- Shared by every player
+Animation.loadDefinitions(SHEETS_DIR, ANIMATIONS, DEFAULT_FPS)
 
 -- Wrap an angle to the range [-pi, pi)
 local function normalizeAngle(angle)
@@ -112,10 +102,7 @@ function Player.new(x, y, spawnBullet)
     self.feetReversed = false
     self.isMoving = false
 
-    self.animations = {}
-    for name, definition in pairs(ANIMATIONS) do
-        self.animations[name] = Animation.new(definition)
-    end
+    self.animations = Animation.newSet(ANIMATIONS)
 
     -- The player starts with the handgun
     self:changeState(states.handgunReady)
@@ -186,12 +173,12 @@ function Player:update(dt)
 
     -- The state decides what the torso does
     self.state.update(self, dt)
-    self.torso = switchTo(self.torso, self.animations[self.state.torso(self)])
+    self.torso = Animation.switch(self.torso, self.animations[self.state.torso(self)])
 
     if self.isMoving then
         self:updateFeet(math.atan2(dirY, dirX))
     else
-        self.feet = switchTo(self.feet, self.animations.feetIdle)
+        self.feet = Animation.switch(self.feet, self.animations.feetIdle)
         self.feetAngle = self.aimAngle
         self.feetReversed = false
     end
@@ -207,19 +194,19 @@ function Player:updateFeet(moveAngle)
 
     self.feetReversed = false
     if math.abs(relative) <= FORWARD_LIMIT then
-        self.feet = switchTo(self.feet, animations.feetWalk)
+        self.feet = Animation.switch(self.feet, animations.feetWalk)
         self.feetAngle = moveAngle
     elseif math.abs(relative) >= BACKWARD_LIMIT then
         -- Backwards: feet face the aim, walk plays in reverse
-        self.feet = switchTo(self.feet, animations.feetWalk)
+        self.feet = Animation.switch(self.feet, animations.feetWalk)
         self.feetAngle = moveAngle + math.pi
         self.feetReversed = true
     elseif relative < 0 then
         -- Strafe sprites step sideways
-        self.feet = switchTo(self.feet, animations.feetStrafeLeft)
+        self.feet = Animation.switch(self.feet, animations.feetStrafeLeft)
         self.feetAngle = moveAngle + math.pi / 2
     else
-        self.feet = switchTo(self.feet, animations.feetStrafeRight)
+        self.feet = Animation.switch(self.feet, animations.feetStrafeRight)
         self.feetAngle = moveAngle - math.pi / 2
     end
 end

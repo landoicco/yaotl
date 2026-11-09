@@ -9,6 +9,10 @@ local SCALE = 0.35
 local DEFAULT_FPS = 15
 -- Stops at this distance from the target instead of overlapping it
 local REACH = 30
+-- The swing only lands if the target is still this close; stepping back dodges it
+local ATTACK_RANGE = 50
+-- Frame of the attack where the arms close on the target
+local HIT_FRAME = 6
 local HEALTH = 3 -- handgun shots to kill
 -- Body size for collisions, in pixels after scaling
 local RADIUS = 25
@@ -28,6 +32,13 @@ local ANIMATIONS = {
         frameWidth = 288, frameHeight = 311, frameCount = 17,
         originX = 120, originY = 170,
     },
+    -- 9 frames at 15 fps: one swing every 0.6 s
+    attack = {
+        sheet = "attack.png",
+        frameWidth = 318, frameHeight = 294, frameCount = 9,
+        originX = 135, originY = 150,
+        loops = false,
+    },
 }
 
 -- Load each spritesheet once, shared by every zombie
@@ -36,7 +47,7 @@ for _, definition in pairs(ANIMATIONS) do
     definition.fps = definition.fps or DEFAULT_FPS
 end
 
--- target: any table with x and y, usually the player
+-- target: x, y and takeHit(), usually the player
 function Zombie.new(x, y, target)
     local self = setmetatable({}, Zombie)
     self.x = x
@@ -48,6 +59,8 @@ function Zombie.new(x, y, target)
     -- Counts down once health reaches 0; the zombie is removed at 0
     self.fadeTime = FADE_DURATION
     self.isDead = false
+    -- Whether the current swing already landed or missed
+    self.hasHit = false
 
     self.animations = {}
     for name, definition in pairs(ANIMATIONS) do
@@ -76,20 +89,43 @@ function Zombie:update(dt)
 
     local dx, dy = self.target.x - self.x, self.target.y - self.y
     local distance = math.sqrt(dx * dx + dy * dy)
-    self.angle = math.atan2(dy, dx)
 
-    local nextAnimation = self.animations.idle
-    if distance > REACH then
+    if self.animation == self.animations.attack then
+        self:updateAttack(distance)
+    elseif distance > REACH then
+        self.angle = math.atan2(dy, dx)
         self.x = self.x + dx / distance * SPEED * dt
         self.y = self.y + dy / distance * SPEED * dt
-        nextAnimation = self.animations.move
+        self:switchTo(self.animations.move)
+    else
+        -- The swing keeps the angle it started with
+        self.angle = math.atan2(dy, dx)
+        self.hasHit = false
+        self:switchTo(self.animations.attack)
     end
 
-    if nextAnimation ~= self.animation then
-        nextAnimation:reset()
-        self.animation = nextAnimation
-    end
     self.animation:update(dt)
+end
+
+-- Lands the hit once per swing and chases again when the swing ends
+function Zombie:updateAttack(distance)
+    local attack = self.animations.attack
+    if not self.hasHit and attack:frameIndex() >= HIT_FRAME then
+        self.hasHit = true
+        if distance <= ATTACK_RANGE then
+            self.target:takeHit()
+        end
+    end
+    if attack:isFinished() then
+        self:switchTo(self.animations.move)
+    end
+end
+
+function Zombie:switchTo(animation)
+    if animation ~= self.animation then
+        animation:reset()
+        self.animation = animation
+    end
 end
 
 function Zombie:draw()

@@ -7,6 +7,7 @@ local Player = {}
 Player.__index = Player
 
 local SPEED = 150 -- pixels per second
+local HEALTH = 5 -- zombie hits to kill
 local SCALE = 0.35
 local DEFAULT_FPS = 15
 
@@ -104,6 +105,7 @@ function Player.new(x, y, spawnBullet)
     self.x = x
     self.y = y
     self.spawnBullet = spawnBullet
+    self.health = HEALTH
     self.weapon = Weapon.new(HANDGUN_MAGAZINE, HANDGUN_RESERVE)
     self.aimAngle = 0
     self.feetAngle = 0
@@ -126,6 +128,14 @@ end
 function Player:changeState(state)
     self.state = state
     state.enter(self)
+end
+
+function Player:isAlive()
+    return self.health > 0
+end
+
+function Player:takeHit()
+    self.health = math.max(self.health - 1, 0)
 end
 
 -- Fire a bullet from the muzzle, rotated with the aim

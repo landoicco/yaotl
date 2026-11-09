@@ -77,6 +77,11 @@ function World:update(dt)
     updateAll(self.zombies, dt)
 end
 
+-- The match is lost once the player dies
+function World:isOver()
+    return not self.player:isAlive()
+end
+
 function World:draw()
     drawAll(self.zombies)
     self.player:draw()

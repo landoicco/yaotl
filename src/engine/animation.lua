@@ -54,12 +54,15 @@ function Animation:isFinished()
     return not self.loops and self.time >= self.duration
 end
 
+-- Current frame, starting at 1 and clamped to the last one
+function Animation:frameIndex()
+    return math.min(math.floor(self.time * self.definition.fps) + 1, #self.frames)
+end
+
 function Animation:draw(x, y, angle, scale)
-    -- Clamp to the last frame
-    local index = math.min(math.floor(self.time * self.definition.fps) + 1, #self.frames)
     local definition = self.definition
     love.graphics.draw(
-        definition.image, self.frames[index],
+        definition.image, self.frames[self:frameIndex()],
         x, y, angle, scale, scale,
         definition.originX, definition.originY
     )

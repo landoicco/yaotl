@@ -12,6 +12,11 @@ end
 
 function love.update(dt)
     world:update(dt)
+
+    -- Temporary: restart right away until there is a game over screen
+    if world:isOver() then
+        world = World.new()
+    end
 end
 
 function love.keypressed(key)
@@ -27,6 +32,8 @@ function love.draw()
     world:draw()
 
     -- Temporary debug readout until there is a HUD
-    local weapon = world.player.weapon
+    local player = world.player
+    local weapon = player.weapon
     love.graphics.print(string.format("Ammo: %d / %d", weapon.magazine, weapon.reserve), 10, 10)
+    love.graphics.print(string.format("Health: %d", player.health), 10, 30)
 end

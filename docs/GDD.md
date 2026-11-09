@@ -37,6 +37,10 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 - Design patterns come from Robert Nystrom's [*Game Programming Patterns*](https://gameprogrammingpatterns.com/).
 - A pattern is introduced only when the project's complexity calls for it, and it is documented here when that happens.
 
+### Distribution
+
+- A CI pipeline builds executables of the game for Linux and Windows.
+
 ## 7. Assets
 
 - All art and audio are free third-party assets.

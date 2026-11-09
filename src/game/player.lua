@@ -1,5 +1,6 @@
 local Animation = require("src.engine.animation")
 local Flashlight = require("src.game.flashlight")
+local MuzzleFlash = require("src.game.muzzle_flash")
 local states = require("src.game.player_states")
 local Weapon = require("src.game.weapon")
 
@@ -101,6 +102,7 @@ function Player.new(x, y, spawnBullet)
     self.health = HEALTH
     self.weapon = Weapon.new(HANDGUN_MAGAZINE, HANDGUN_RESERVE)
     self.flashlight = Flashlight.new()
+    self.muzzleFlash = MuzzleFlash.new()
     self.aimAngle = 0
     self.feetAngle = 0
     self.feetReversed = false
@@ -136,11 +138,12 @@ function Player:torsoPoint(spriteX, spriteY)
     return self.x + offsetX * cos - offsetY * sin, self.y + offsetX * sin + offsetY * cos
 end
 
--- Fire a bullet from the muzzle
+-- Fire a bullet from the muzzle, lighting it up
 function Player:shoot()
     local x, y = self:torsoPoint(MUZZLE_X, MUZZLE_Y)
     self.weapon:consumeRound()
     self.spawnBullet(x, y, self.aimAngle)
+    self.muzzleFlash:fire(x, y)
 end
 
 function Player:isHoldingFlashlight()
@@ -152,6 +155,8 @@ function Player:addLights(lights)
     if self:isHoldingFlashlight() then
         self.flashlight:addLights(lights)
     end
+    -- Whatever is held now, a recent shot fades out on its own
+    self.muzzleFlash:addLights(lights)
 end
 
 function Player:keypressed(key)
@@ -208,6 +213,7 @@ function Player:update(dt)
     local lensX, lensY = self:torsoPoint(LENS_X, LENS_Y)
     self.flashlight:place(lensX, lensY, self.aimAngle, self.x, self.y)
     self.flashlight:update(dt, self:isHoldingFlashlight())
+    self.muzzleFlash:update(dt)
 end
 
 -- Feet animation and angle from the movement relative to the aim

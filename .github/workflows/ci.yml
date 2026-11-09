@@ -37,12 +37,9 @@ jobs:
         with:
           name: yaotl-linux
           path: build/yaotl-linux.AppImage
-      - uses: actions/upload-artifact@v4
-        with:
-          name: yaotl-love
-          path: build/yaotl.love
       # The release attaches the zip
       - uses: actions/upload-artifact@v4
+        if: startsWith(github.ref, 'refs/tags/v')
         with:
           name: release-windows
           path: build/yaotl-windows.zip
@@ -57,7 +54,7 @@ jobs:
       # Skips the unzipped Windows folder
       - uses: actions/download-artifact@v4
         with:
-          pattern: "{yaotl-linux,yaotl-love,release-windows}"
+          pattern: "{yaotl-linux,release-windows}"
           path: dist
           merge-multiple: true
       - name: Create release

@@ -14,9 +14,9 @@ jobs:
       - uses: cachix/install-nix-action@v31
       # Same tool versions as local, pinned by flake.lock
       - name: luacheck
-        run: nix develop --command luacheck .
+        run: nix develop .#lint --command luacheck .
       - name: StyLua
-        run: nix develop --command stylua --check .
+        run: nix develop .#lint --command stylua --check .
 
   build:
     needs: lint

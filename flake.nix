@@ -10,18 +10,27 @@
       forAllSystems = f: nixpkgs.lib.genAttrs systems (system: f nixpkgs.legacyPackages.${system});
     in
     {
-      devShells = forAllSystems (pkgs: {
+      devShells = forAllSystems (pkgs: rec {
+        # Only the checks, so CI does not download the editors
+        # luacheck and stylua are pinned here so CI runs the same versions
+        lint = pkgs.mkShellNoCC {
+          packages = [ pkgs.luajitPackages.luacheck pkgs.stylua ];
+        };
+
         default = pkgs.mkShellNoCC {
-          # luacheck and stylua are pinned here so CI runs the same versions
-          packages = [ pkgs.love pkgs.gh pkgs.luajitPackages.luacheck pkgs.stylua ];
+          inputsFrom = [ lint ];
+          packages = [ pkgs.love pkgs.gh pkgs.tiled pkgs.imagemagick ];
           shellHook = ''
             echo "Yaotl dev shell"
             echo "💘 love ${pkgs.love.version}"
             echo "🐙 gh ${pkgs.gh.version}"
             echo "🔍 luacheck ${pkgs.luajitPackages.luacheck.version}"
             echo "🎨 stylua ${pkgs.stylua.version}"
+            echo "🗺️ tiled ${pkgs.tiled.version}"
+            echo "🖼️ imagemagick ${pkgs.imagemagick.version}"
             echo "Run the game with: love ."
             echo "Check the code with: luacheck . && stylua --check ."
+            echo "Edit maps with: tiled maps/"
           '';
         };
       });

@@ -2,8 +2,8 @@
 # Packs the loose animation frames from the asset packs into one grid
 # spritesheet per animation.
 #
-# Requires ImageMagick. Run it from the project root without installing it:
-#   nix shell nixpkgs#imagemagick -c ./tools/pack-sprites.sh
+# Requires ImageMagick, included in the Nix dev shell. Run it from the project root:
+#   nix develop -c ./tools/pack-sprites.sh
 set -euo pipefail
 
 SOURCE_DIR="assets_local"
@@ -32,7 +32,7 @@ ANIMATIONS=(
 )
 
 if ! command -v montage >/dev/null; then
-    echo "ImageMagick not found. Run: nix shell nixpkgs#imagemagick -c $0" >&2
+    echo "ImageMagick not found. Run: nix develop -c $0" >&2
     exit 1
 fi
 

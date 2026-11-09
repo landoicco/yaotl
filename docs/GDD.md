@@ -12,13 +12,15 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 
 ## 2. Player
 
-- Moves with WASD and faces the mouse cursor.
-- Carries a single weapon.
+- Moves with WASD. The torso faces the mouse cursor and the feet follow the movement: walking, walking backwards or strafing.
+- Holds either the weapon or the flashlight, and switches between them with `Q`.
+- Cannot shoot while holding the flashlight, so seeing and defending become a trade-off.
 
 ## 3. Weapon
 
-- A single weapon.
+- The player starts with a handgun.
 - Limited ammo, with reloading.
+- Reloading is manual, with `R`, and never automatic: the player has to remember to reload.
 
 ## 4. Enemies
 
@@ -36,6 +38,19 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 
 - Design patterns come from Robert Nystrom's [*Game Programming Patterns*](https://gameprogrammingpatterns.com/).
 - A pattern is introduced only when the project's complexity calls for it, and it is documented here when that happens.
+
+### Code structure
+
+The code is split so that a reusable engine can grow out of the game:
+
+- `src/engine/`: generic modules that know nothing about Yaotl.
+- `src/game/`: everything specific to Yaotl.
+
+Rules:
+
+- `game/` may require `engine/`, but `engine/` never requires `game/`.
+- A module moves into `engine/` only after the game has used it and it has proved to be generic.
+- Nothing is added to `engine/` that the game does not need.
 
 ### Distribution
 

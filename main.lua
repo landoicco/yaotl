@@ -15,10 +15,12 @@ function love.update(dt)
     player:update(dt)
 end
 
+function love.keypressed(key)
+    player:keypressed(key)
+end
+
 function love.mousepressed(x, y, btn, istouch, presses)
-    if btn == 1 then
-        print("Shoot")
-    end
+    player:mousepressed(btn)
 end
 
 -- Callback function used to draw on screen every frame

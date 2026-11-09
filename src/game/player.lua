@@ -1,28 +1,54 @@
 local Animation = require("src.engine.animation")
+local states = require("src.game.player_states")
 
 -- The survivor: moves with WASD, the torso faces the mouse cursor
--- and the feet face the direction of movement
+-- and the feet face the direction of movement. What the torso does
+-- depends on the current state (see player_states.lua)
 local Player = {}
 Player.__index = Player
 
 local SPEED = 150 -- pixels per second
 local SCALE = 0.35
-local ANIMATION_FPS = 15
+local DEFAULT_FPS = 15
 
 local SHEETS_DIR = "assets/sprites/player/"
 
 -- Frame layout as printed by tools/pack-sprites.sh. The origin is the center
--- of the body, which for the torso is offset by the extended arm
+-- of the body, which for the torso is offset by the extended arm.
+-- Animations without an fps play at DEFAULT_FPS
 local ANIMATIONS = {
-    torsoIdle = {
+    flashlightIdle = {
         sheet = "flashlight_idle.png",
         frameWidth = 303, frameHeight = 223, frameCount = 20,
         originX = 95, originY = 120,
     },
-    torsoMove = {
+    flashlightMove = {
         sheet = "flashlight_move.png",
         frameWidth = 305, frameHeight = 231, frameCount = 20,
         originX = 95, originY = 120,
+    },
+    handgunIdle = {
+        sheet = "handgun_idle.png",
+        frameWidth = 253, frameHeight = 216, frameCount = 20,
+        originX = 110, originY = 120,
+    },
+    handgunMove = {
+        sheet = "handgun_move.png",
+        frameWidth = 258, frameHeight = 220, frameCount = 20,
+        originX = 110, originY = 120,
+    },
+    handgunShoot = {
+        sheet = "handgun_shoot.png",
+        frameWidth = 255, frameHeight = 215, frameCount = 3,
+        originX = 110, originY = 120,
+        fps = 20, loops = false,
+    },
+    -- Its length sets the reload time: 15 frames at 15 fps take one second
+    handgunReload = {
+        sheet = "handgun_reload.png",
+        frameWidth = 260, frameHeight = 230, frameCount = 15,
+        originX = 110, originY = 120,
+        loops = false,
     },
     feetIdle = {
         sheet = "feet_idle.png",
@@ -54,6 +80,7 @@ local BACKWARD_LIMIT = 3 * math.pi / 4
 -- Load each spritesheet once, shared by every player
 for _, definition in pairs(ANIMATIONS) do
     definition.image = love.graphics.newImage(SHEETS_DIR .. definition.sheet)
+    definition.fps = definition.fps or DEFAULT_FPS
 end
 
 -- Switch to another animation, restarting it only when it actually changes
@@ -76,15 +103,32 @@ function Player.new(x, y)
     self.aimAngle = 0
     self.feetAngle = 0
     self.feetReversed = false
+    self.isMoving = false
 
     self.animations = {}
     for name, definition in pairs(ANIMATIONS) do
-        self.animations[name] = Animation.new(definition, ANIMATION_FPS)
+        self.animations[name] = Animation.new(definition)
     end
-    self.torso = self.animations.torsoIdle
+
+    -- The player starts with the handgun
+    self:changeState(states.handgunReady)
+    self.torso = self.animations[self.state.torso(self)]
     self.feet = self.animations.feetIdle
 
     return self
+end
+
+function Player:changeState(state)
+    self.state = state
+    state.enter(self)
+end
+
+function Player:keypressed(key)
+    self.state.keypressed(self, key)
+end
+
+function Player:mousepressed(button)
+    self.state.mousepressed(self, button)
 end
 
 function Player:update(dt)
@@ -105,8 +149,8 @@ function Player:update(dt)
 
     -- Normalize so diagonal movement is not faster
     local length = math.sqrt(dirX * dirX + dirY * dirY)
-    local isMoving = length > 0
-    if isMoving then
+    self.isMoving = length > 0
+    if self.isMoving then
         self.x = self.x + dirX / length * SPEED * dt
         self.y = self.y + dirY / length * SPEED * dt
     end
@@ -115,13 +159,14 @@ function Player:update(dt)
     local mouseX, mouseY = love.mouse.getPosition()
     self.aimAngle = math.atan2(mouseY - self.y, mouseX - self.x)
 
-    local animations = self.animations
-    if isMoving then
-        self.torso = switchTo(self.torso, animations.torsoMove)
+    -- The state decides what the torso does
+    self.state.update(self, dt)
+    self.torso = switchTo(self.torso, self.animations[self.state.torso(self)])
+
+    if self.isMoving then
         self:updateFeet(math.atan2(dirY, dirX))
     else
-        self.torso = switchTo(self.torso, animations.torsoIdle)
-        self.feet = switchTo(self.feet, animations.feetIdle)
+        self.feet = switchTo(self.feet, self.animations.feetIdle)
         self.feetAngle = self.aimAngle
         self.feetReversed = false
     end

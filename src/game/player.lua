@@ -51,6 +51,30 @@ local ANIMATIONS = {
         originX = 110, originY = 120,
         loops = false,
     },
+    shotgunIdle = {
+        sheet = "shotgun_idle.png",
+        frameWidth = 313, frameHeight = 207, frameCount = 20,
+        originX = 112, originY = 118,
+    },
+    shotgunMove = {
+        sheet = "shotgun_move.png",
+        frameWidth = 313, frameHeight = 206, frameCount = 20,
+        originX = 112, originY = 118,
+    },
+    -- Slower than the handgun's, so the shotgun fires less often
+    shotgunShoot = {
+        sheet = "shotgun_shoot.png",
+        frameWidth = 312, frameHeight = 206, frameCount = 3,
+        originX = 112, originY = 118,
+        fps = 6, loops = false,
+    },
+    -- 20 frames at 15 fps = 1.33 s
+    shotgunReload = {
+        sheet = "shotgun_reload.png",
+        frameWidth = 322, frameHeight = 217, frameCount = 20,
+        originX = 116, originY = 119,
+        loops = false,
+    },
     feetIdle = {
         sheet = "feet_idle.png",
         frameWidth = 132, frameHeight = 155, frameCount = 1,
@@ -73,13 +97,26 @@ local ANIMATIONS = {
     },
 }
 
--- Handgun muzzle, in sprite pixels from the origin
-local MUZZLE_X, MUZZLE_Y = 133, 38
 -- Flashlight lens, in sprite pixels from the origin
 local LENS_X, LENS_Y = 200, -16
 
-local HANDGUN_MAGAZINE = 12
-local HANDGUN_RESERVE = 36
+-- name matches the animations' prefix; spread is the half-angle of the pellets, in radians;
+-- flashSize scales the muzzle flash; the muzzle is in sprite pixels from the origin
+-- stylua: ignore
+local WEAPONS = {
+    handgun = {
+        name = "handgun", label = "Handgun",
+        magazineSize = 12, reserve = 36,
+        pellets = 1, spread = 0, flashSize = 1,
+        muzzleX = 133, muzzleY = 38,
+    },
+    shotgun = {
+        name = "shotgun", label = "Shotgun",
+        magazineSize = 6, reserve = 18,
+        pellets = 7, spread = 0.15, flashSize = 1.6,
+        muzzleX = 181, muzzleY = 34,
+    },
+}
 
 -- Angles from the aim that separate walking forward, strafing and walking backwards
 local FORWARD_LIMIT = math.pi / 4
@@ -100,7 +137,12 @@ function Player.new(x, y, spawnBullet)
     self.y = y
     self.spawnBullet = spawnBullet
     self.health = HEALTH
-    self.weapon = Weapon.new(HANDGUN_MAGAZINE, HANDGUN_RESERVE)
+    self.weapons = {
+        handgun = Weapon.new(WEAPONS.handgun),
+        shotgun = Weapon.new(WEAPONS.shotgun),
+    }
+    -- The weapon in hand, or the last one used while holding the flashlight
+    self.weapon = self.weapons.handgun
     self.flashlight = Flashlight.new()
     self.muzzleFlash = MuzzleFlash.new()
     self.aimAngle = 0
@@ -138,12 +180,20 @@ function Player:torsoPoint(spriteX, spriteY)
     return self.x + offsetX * cos - offsetY * sin, self.y + offsetX * sin + offsetY * cos
 end
 
--- Fire a bullet from the muzzle, lighting it up
+function Player:equip(weaponName)
+    self.weapon = self.weapons[weaponName]
+end
+
+-- Fire the weapon's pellets from the muzzle, each at a random angle within the spread
 function Player:shoot()
-    local x, y = self:torsoPoint(MUZZLE_X, MUZZLE_Y)
+    local stats = self.weapon.stats
+    local x, y = self:torsoPoint(stats.muzzleX, stats.muzzleY)
     self.weapon:consumeRound()
-    self.spawnBullet(x, y, self.aimAngle)
-    self.muzzleFlash:fire(x, y)
+    for _ = 1, stats.pellets do
+        local offset = (love.math.random() * 2 - 1) * stats.spread
+        self.spawnBullet(x, y, self.aimAngle + offset)
+    end
+    self.muzzleFlash:fire(x, y, stats.flashSize)
 end
 
 function Player:isHoldingFlashlight()

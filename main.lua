@@ -34,7 +34,7 @@ function love.draw()
     -- Temporary debug readout until there is a HUD
     local player = world.player
     local weapon = player.weapon
-    love.graphics.print(string.format("Ammo: %d / %d", weapon.magazine, weapon.reserve), 10, 10)
+    love.graphics.print(string.format("%s: %d / %d", weapon.stats.label, weapon.magazine, weapon.reserve), 10, 10)
     love.graphics.print(string.format("Health: %d", player.health), 10, 30)
     love.graphics.print(string.format("Battery: %d%%", math.ceil(player.flashlight.charge * 100)), 10, 50)
 end

@@ -1,17 +1,5 @@
--- What the player is holding and doing, following the State pattern from
--- Game Programming Patterns. The handgun is a superstate: its substates
--- inherit its behavior, such as switching to the flashlight, and override
--- only what differs.
---
--- States hold no data of their own, so a single table per state is shared.
--- Every function receives the player it acts on.
---
--- Each state implements:
---   enter(player)                called when the player switches to this state
---   update(player, dt)
---   keypressed(player, key)
---   mousepressed(player, button)
---   torso(player)                name of the torso animation to play
+-- Player states, a hierarchical state machine (see docs/adr/0001-player-state-machine.md)
+-- Each state implements: enter, update, keypressed, mousepressed, torso
 local states = {}
 
 local SWITCH_KEY = "q"
@@ -44,7 +32,7 @@ function Handgun.enter(player) end
 
 function Handgun.update(player, dt) end
 
--- Switching to the flashlight works from any handgun state, even mid-reload
+-- Works from every handgun substate, cancelling a reload
 function Handgun.keypressed(player, key)
     if key == SWITCH_KEY then
         player:changeState(states.flashlight)
@@ -53,7 +41,7 @@ end
 
 function Handgun.mousepressed(player, button) end
 
--- Substates inherit whatever they do not override from the handgun
+-- New substate inheriting from Handgun
 local function handgunState()
     return setmetatable({}, { __index = Handgun })
 end

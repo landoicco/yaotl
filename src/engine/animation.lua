@@ -2,13 +2,7 @@
 local Animation = {}
 Animation.__index = Animation
 
--- The definition describes the spritesheet and how to play it:
---   image                    grid spritesheet, frames read left to right, top to bottom
---   frameWidth, frameHeight  size of one frame
---   frameCount               number of frames
---   originX, originY         point of the frame the sprite is drawn and rotated around
---   fps                      frames per second
---   loops                    false to play once and stop on the last frame (default true)
+-- definition: image, frameWidth, frameHeight, frameCount, originX, originY, fps, loops (default true)
 function Animation.new(definition)
     local self = setmetatable({}, Animation)
     self.definition = definition
@@ -37,26 +31,25 @@ end
 -- A negative dt plays the animation backwards
 function Animation:update(dt)
     if self.loops then
-        -- Wrap around the loop length so the timer never grows unbounded.
-        -- Lua's modulo takes the sign of the divisor, so the result stays positive
+        -- Wrap to the loop length; Lua's % keeps it positive when dt < 0
         self.time = (self.time + dt) % self.duration
     else
         self.time = math.min(self.time + dt, self.duration)
     end
 end
 
--- Restart from the first frame, e.g. when switching to this animation
+-- Restart from the first frame
 function Animation:reset()
     self.time = 0
 end
 
--- Whether an animation that plays once has reached its end. Looping ones never finish
+-- True once a non-looping animation reaches its end
 function Animation:isFinished()
     return not self.loops and self.time >= self.duration
 end
 
 function Animation:draw(x, y, angle, scale)
-    -- Clamp so the end of the loop, or of a finished animation, shows the last frame
+    -- Clamp to the last frame
     local index = math.min(math.floor(self.time * self.definition.fps) + 1, #self.frames)
     local definition = self.definition
     love.graphics.draw(

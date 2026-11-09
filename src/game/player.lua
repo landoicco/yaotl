@@ -1,9 +1,7 @@
 local Animation = require("src.engine.animation")
 local states = require("src.game.player_states")
 
--- The survivor: moves with WASD, the torso faces the mouse cursor
--- and the feet face the direction of movement. What the torso does
--- depends on the current state (see player_states.lua)
+-- The survivor: the torso aims at the mouse, the feet follow the movement
 local Player = {}
 Player.__index = Player
 
@@ -13,9 +11,7 @@ local DEFAULT_FPS = 15
 
 local SHEETS_DIR = "assets/sprites/player/"
 
--- Frame layout as printed by tools/pack-sprites.sh. The origin is the center
--- of the body, which for the torso is offset by the extended arm.
--- Animations without an fps play at DEFAULT_FPS
+-- Layouts from tools/pack-sprites.sh; the origin is the center of the body
 local ANIMATIONS = {
     flashlightIdle = {
         sheet = "flashlight_idle.png",
@@ -43,7 +39,7 @@ local ANIMATIONS = {
         originX = 110, originY = 120,
         fps = 20, loops = false,
     },
-    -- Its length sets the reload time: 15 frames at 15 fps take one second
+    -- Sets the reload time: 15 frames at 15 fps = 1 s
     handgunReload = {
         sheet = "handgun_reload.png",
         frameWidth = 260, frameHeight = 230, frameCount = 15,
@@ -75,8 +71,7 @@ local ANIMATIONS = {
 -- Handgun muzzle, in sprite pixels from the origin
 local MUZZLE_X, MUZZLE_Y = 133, 38
 
--- Movement within this angle of the aim walks forward, and beyond
--- BACKWARD_LIMIT walks backwards. Anything in between strafes
+-- Angles from the aim that separate walking forward, strafing and walking backwards
 local FORWARD_LIMIT = math.pi / 4
 local BACKWARD_LIMIT = 3 * math.pi / 4
 
@@ -189,7 +184,7 @@ function Player:update(dt)
     self.feet:update(self.feetReversed and -dt or dt)
 end
 
--- Pick the feet animation and angle from the movement direction relative to the aim
+-- Feet animation and angle from the movement relative to the aim
 function Player:updateFeet(moveAngle)
     local animations = self.animations
     local relative = normalizeAngle(moveAngle - self.aimAngle)
@@ -199,12 +194,12 @@ function Player:updateFeet(moveAngle)
         self.feet = switchTo(self.feet, animations.feetWalk)
         self.feetAngle = moveAngle
     elseif math.abs(relative) >= BACKWARD_LIMIT then
-        -- Walking backwards: the feet face away from the movement and the walk plays in reverse
+        -- Backwards: feet face the aim, walk plays in reverse
         self.feet = switchTo(self.feet, animations.feetWalk)
         self.feetAngle = moveAngle + math.pi
         self.feetReversed = true
     elseif relative < 0 then
-        -- The strafe sprites step sideways, so the feet face perpendicular to the movement
+        -- Strafe sprites step sideways
         self.feet = switchTo(self.feet, animations.feetStrafeLeft)
         self.feetAngle = moveAngle + math.pi / 2
     else

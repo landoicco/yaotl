@@ -10,7 +10,7 @@ end
 
 -- This function is called once at the beginning of the game
 function love.load()
-    -- Neutral floor tone so the dark sprites stay visible, until the map is drawn
+    -- Placeholder floor color until there is a map
     love.graphics.setBackgroundColor(0.45, 0.45, 0.42)
 
     local windowWidth, windowHeight = love.graphics.getDimensions()

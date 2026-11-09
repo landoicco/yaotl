@@ -58,7 +58,7 @@ function World.new()
     self.map = Map.load("sandbox")
 
     local spawn = self.map.playerSpawn
-    self.player = Player.new(spawn.x, spawn.y, function(x, y, angle)
+    self.player = Player.new(spawn.x, spawn.y, self.map, function(x, y, angle)
         self:spawnBullet(x, y, angle)
     end)
 
@@ -73,11 +73,11 @@ function World.new()
 end
 
 function World:spawnZombie(x, y)
-    table.insert(self.zombies, Zombie.new(x, y, self.player))
+    table.insert(self.zombies, Zombie.new(x, y, self.player, self.map))
 end
 
 function World:spawnBullet(x, y, angle)
-    table.insert(self.bullets, Bullet.new(x, y, angle))
+    table.insert(self.bullets, Bullet.new(x, y, angle, self.map))
 end
 
 function World:update(dt)

@@ -45,12 +45,13 @@ local ANIMATIONS = {
 -- Shared by every zombie
 Animation.loadDefinitions(SHEETS_DIR, ANIMATIONS, DEFAULT_FPS)
 
--- target: x, y and takeHit(), usually the player
-function Zombie.new(x, y, target)
+-- target: x, y and takeHit(), usually the player; map: the walls it cannot cross
+function Zombie.new(x, y, target, map)
     local self = setmetatable({}, Zombie)
     self.x = x
     self.y = y
     self.target = target
+    self.map = map
     self.angle = 0
     self.radius = RADIUS
     self.health = HEALTH
@@ -89,8 +90,9 @@ function Zombie:update(dt)
         self:updateAttack(distance)
     elseif distance > REACH then
         self.angle = math.atan2(dy, dx)
-        self.x = self.x + dx / distance * SPEED * dt
-        self.y = self.y + dy / distance * SPEED * dt
+        -- Still straight at the target, so walls in between stop it
+        local step = SPEED * dt / distance
+        self.x, self.y = self.map:pushOut(self.x + dx * step, self.y + dy * step, self.radius)
         self:switchTo(self.animations.move)
     else
         -- The swing keeps the angle it started with

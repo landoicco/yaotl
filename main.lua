@@ -7,8 +7,12 @@ function love.load()
     world = World.new()
 end
 
+-- A long frame, such as while the window is dragged, could move things past a whole wall;
+-- capping it keeps every move smaller than a wall
+local MAX_DT = 1 / 20
+
 function love.update(dt)
-    world:update(dt)
+    world:update(math.min(dt, MAX_DT))
 
     -- Temporary: restart right away until there is a game over screen
     if world:isOver() then

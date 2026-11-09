@@ -50,7 +50,7 @@ end
 local HandgunReady = handgunState()
 
 function HandgunReady.keypressed(player, key)
-    if key == RELOAD_KEY then
+    if key == RELOAD_KEY and player.weapon:canReload() then
         player:changeState(states.handgunReloading)
     else
         Handgun.keypressed(player, key)
@@ -58,7 +58,7 @@ function HandgunReady.keypressed(player, key)
 end
 
 function HandgunReady.mousepressed(player, button)
-    if button == SHOOT_BUTTON then
+    if button == SHOOT_BUTTON and player.weapon:canShoot() then
         player:changeState(states.handgunShooting)
     end
 end
@@ -87,8 +87,10 @@ end
 -- Reloading. Cannot shoot until the reload animation ends
 local HandgunReloading = handgunState()
 
+-- Rounds move into the magazine only if the reload completes
 function HandgunReloading.update(player, dt)
     if player.torso:isFinished() then
+        player.weapon:reload()
         player:changeState(states.handgunReady)
     end
 end

@@ -1,5 +1,6 @@
 local Animation = require("src.engine.animation")
 local states = require("src.game.player_states")
+local Weapon = require("src.game.weapon")
 
 -- The survivor: the torso aims at the mouse, the feet follow the movement
 local Player = {}
@@ -71,6 +72,9 @@ local ANIMATIONS = {
 -- Handgun muzzle, in sprite pixels from the origin
 local MUZZLE_X, MUZZLE_Y = 133, 38
 
+local HANDGUN_MAGAZINE = 12
+local HANDGUN_RESERVE = 36
+
 -- Angles from the aim that separate walking forward, strafing and walking backwards
 local FORWARD_LIMIT = math.pi / 4
 local BACKWARD_LIMIT = 3 * math.pi / 4
@@ -100,6 +104,7 @@ function Player.new(x, y, spawnBullet)
     self.x = x
     self.y = y
     self.spawnBullet = spawnBullet
+    self.weapon = Weapon.new(HANDGUN_MAGAZINE, HANDGUN_RESERVE)
     self.aimAngle = 0
     self.feetAngle = 0
     self.feetReversed = false
@@ -129,6 +134,7 @@ function Player:shoot()
     local offsetX, offsetY = MUZZLE_X * SCALE, MUZZLE_Y * SCALE
     local x = self.x + offsetX * cos - offsetY * sin
     local y = self.y + offsetX * sin + offsetY * cos
+    self.weapon:consumeRound()
     self.spawnBullet(x, y, self.aimAngle)
 end
 

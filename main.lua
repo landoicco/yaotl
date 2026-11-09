@@ -44,4 +44,8 @@ function love.draw()
     for _, bullet in ipairs(bullets) do
         bullet:draw()
     end
+
+    -- Temporary debug readout until there is a HUD
+    local weapon = player.weapon
+    love.graphics.print(string.format("Ammo: %d / %d", weapon.magazine, weapon.reserve), 10, 10)
 end

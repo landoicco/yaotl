@@ -1,5 +1,6 @@
 local Player = require("src.game.player")
 local Bullet = require("src.game.bullet")
+local Lighting = require("src.game.lighting")
 local Zombie = require("src.game.zombie")
 
 -- A match: the player and every entity around it
@@ -16,6 +17,9 @@ local function updateAll(entities, dt)
         end
     end
 end
+
+-- Almost black, with a hint of blue
+local AMBIENT = { 0.02, 0.02, 0.03 }
 
 -- Bullets are points; zombies are circles
 local function isHitting(bullet, zombie)
@@ -48,6 +52,7 @@ function World.new()
     local self = setmetatable({}, World)
     self.bullets = {}
     self.zombies = {}
+    self.lighting = Lighting.new(AMBIENT)
 
     local width, height = love.graphics.getDimensions()
     self.player = Player.new(width / 2, height / 2, function(x, y, angle)
@@ -85,6 +90,12 @@ end
 function World:draw()
     drawAll(self.zombies)
     self.player:draw()
+
+    local lights = {}
+    self.player:addLights(lights)
+    self.lighting:draw(lights)
+
+    -- Tracers glow, so the darkness does not cover them
     drawAll(self.bullets)
 end
 

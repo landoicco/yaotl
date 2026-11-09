@@ -10,11 +10,7 @@ local function buildFrames(definition)
     for i = 0, definition.frameCount - 1 do
         local column = i % columns
         local row = math.floor(i / columns)
-        frames[i + 1] = love.graphics.newQuad(
-            column * width, row * height,
-            width, height,
-            image:getDimensions()
-        )
+        frames[i + 1] = love.graphics.newQuad(column * width, row * height, width, height, image:getDimensions())
     end
     return frames
 end
@@ -88,9 +84,15 @@ end
 function Animation:draw(x, y, angle, scale)
     local definition = self.definition
     love.graphics.draw(
-        definition.image, self.frames[self:frameIndex()],
-        x, y, angle, scale, scale,
-        definition.originX, definition.originY
+        definition.image,
+        self.frames[self:frameIndex()],
+        x,
+        y,
+        angle,
+        scale,
+        scale,
+        definition.originX,
+        definition.originY
     )
 end
 

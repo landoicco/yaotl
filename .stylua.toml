@@ -1,0 +1,6 @@
+# Matches the existing code style
+column_width = 120
+indent_type = "Spaces"
+indent_width = 4
+quote_style = "AutoPreferDouble"
+call_parentheses = "Always"

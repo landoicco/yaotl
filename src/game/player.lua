@@ -14,6 +14,7 @@ local DEFAULT_FPS = 15
 local SHEETS_DIR = "assets/sprites/player/"
 
 -- Layouts from tools/pack-sprites.sh; the origin is the center of the body
+-- stylua: ignore
 local ANIMATIONS = {
     flashlightIdle = {
         sheet = "flashlight_idle.png",

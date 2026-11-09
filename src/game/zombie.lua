@@ -21,6 +21,7 @@ local FADE_DURATION = 0.3 -- seconds
 local SHEETS_DIR = "assets/sprites/zombie/"
 
 -- Layouts from tools/pack-sprites.sh; the origin is the center of the body
+-- stylua: ignore
 local ANIMATIONS = {
     idle = {
         sheet = "idle.png",

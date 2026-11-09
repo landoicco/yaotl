@@ -32,6 +32,15 @@ Install [LÖVE 11.5](https://love2d.org/), then run from the project root:
 love .
 ```
 
+## 🔍 Checking the code
+
+CI rejects code that fails [luacheck](https://github.com/lunarmodules/luacheck) or [StyLua](https://github.com/JohnnyMorganz/StyLua). Both come with the Nix dev shell, at the same versions CI uses:
+
+```bash
+luacheck .
+stylua --check .  # or `stylua .` to format
+```
+
 ## 🎮 Controls
 
 | Action | Input |

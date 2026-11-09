@@ -1,6 +1,7 @@
 local Player = require("src.game.player")
 local Bullet = require("src.game.bullet")
 local Lighting = require("src.game.lighting")
+local Map = require("src.game.map")
 local Zombie = require("src.game.zombie")
 
 -- A match: the player and every entity around it
@@ -53,16 +54,16 @@ function World.new()
     self.bullets = {}
     self.zombies = {}
     self.lighting = Lighting.new(AMBIENT)
+    self.map = Map.load("sandbox")
 
-    local width, height = love.graphics.getDimensions()
-    self.player = Player.new(width / 2, height / 2, function(x, y, angle)
+    local spawn = self.map.playerSpawn
+    self.player = Player.new(spawn.x, spawn.y, function(x, y, angle)
         self:spawnBullet(x, y, angle)
     end)
 
-    -- Temporary test zombies until there is a spawner
-    self:spawnZombie(0, 0)
-    self:spawnZombie(width, 0)
-    self:spawnZombie(width / 2, height)
+    for _, zombieSpawn in ipairs(self.map.zombieSpawns) do
+        self:spawnZombie(zombieSpawn.x, zombieSpawn.y)
+    end
 
     return self
 end
@@ -88,6 +89,7 @@ function World:isOver()
 end
 
 function World:draw()
+    self.map:draw()
     drawAll(self.zombies)
     self.player:draw()
 

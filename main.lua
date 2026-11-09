@@ -4,9 +4,6 @@ local world
 
 -- This function is called once at the beginning of the game
 function love.load()
-    -- Placeholder floor color until there is a map
-    love.graphics.setBackgroundColor(0.45, 0.45, 0.42)
-
     world = World.new()
 end
 

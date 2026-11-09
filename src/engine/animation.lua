@@ -2,27 +2,33 @@
 local Animation = {}
 Animation.__index = Animation
 
--- definition: image, frameWidth, frameHeight, frameCount, originX, originY, fps, loops (default true)
-function Animation.new(definition)
-    local self = setmetatable({}, Animation)
-    self.definition = definition
-    self.loops = definition.loops ~= false
-    self.time = 0
-    self.frames = {}
-
+local function buildFrames(definition)
+    local frames = {}
     local image = definition.image
     local width, height = definition.frameWidth, definition.frameHeight
     local columns = math.floor(image:getWidth() / width)
     for i = 0, definition.frameCount - 1 do
         local column = i % columns
         local row = math.floor(i / columns)
-        self.frames[i + 1] = love.graphics.newQuad(
+        frames[i + 1] = love.graphics.newQuad(
             column * width, row * height,
             width, height,
             image:getDimensions()
         )
     end
+    return frames
+end
 
+-- definition: image, frameWidth, frameHeight, frameCount, originX, originY, fps, loops (default true)
+function Animation.new(definition)
+    local self = setmetatable({}, Animation)
+    self.definition = definition
+    self.loops = definition.loops ~= false
+    self.time = 0
+
+    -- Flyweight: frames are built once and shared by every instance of the definition
+    definition.frames = definition.frames or buildFrames(definition)
+    self.frames = definition.frames
     self.duration = #self.frames / definition.fps
 
     return self

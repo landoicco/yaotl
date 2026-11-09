@@ -45,6 +45,8 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 | Pattern | Where | Decision |
 |---|---|---|
 | State (hierarchical) | Player states | [ADR 0001](adr/0001-player-state-machine.md) |
+| Update Method | The world updates every entity and removes the dead ones | — |
+| Flyweight | Animation frames are shared by every instance of a spritesheet | — |
 
 ### Code structure
 

@@ -45,6 +45,7 @@ Under consideration, not yet part of the design:
 - 🎨 **Art from [Riley Gombart](https://opengameart.org/users/rileygombart).** His animated survivor and zombie sprites have many states (idle, move, shoot, reload, melee), which fits a game where reloading matters.
 - 🧪 **Zombie variants by recoloring.** One zombie sprite, with each type getting its own color (a tint or a shader) and scale, so new types need no new art.
 - 🔦 **A dark house.** The house stays in darkness and the player only sees what the flashlight and a few fixed lights (lamps, windows) reveal. This adds tension and gives assets from different sources a unified look.
+- 🔁 **Flashlight or weapon.** The player switches between the flashlight and the weapon and cannot shoot while holding the flashlight, so seeing and defending become a trade-off.
 
 ## 🙏 Credits
 

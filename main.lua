@@ -1,16 +1,8 @@
--- Set window properties
-local windowWidth, windowHeight = 800, 600
 local playerSprite = love.graphics.newImage("survivor.png")
 local playerAngle = 0
 local playerSpeed = 2
 local projectiles = 0
 local projectileSpeed = 5
-
-love.window.setTitle("Puto el k lea esto")
-love.window.setMode(windowWidth, windowHeight, {
-    resizable = false,
-    vsync = 1
-})
 
 -- This funtion is called one at the beginning of the game
 function love.load()
@@ -60,6 +52,7 @@ end
 function setPlayerSpawnPosition()
     local playerHeight = playerSprite:getHeight()
     local playerWidth = playerSprite:getWidth()
+    local windowWidth, windowHeight = love.graphics.getDimensions()
 
     local playerXPos = (windowWidth / 2) - (playerWidth / 2)
     local playerYPos = (windowHeight / 2) - (playerHeight / 2)

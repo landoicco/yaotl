@@ -1,13 +1,14 @@
+local Animation = require("src.animation")
+
 -- The survivor: moves with WASD and faces the mouse cursor
 local Player = {}
 Player.__index = Player
 
-local sprite = love.graphics.newImage("assets/sprites/player/flashlight_idle.png")
--- First frame of the spritesheet, until animations are added
-local frame = love.graphics.newQuad(0, 0, 303, 223, sprite:getDimensions())
+local idleSheet = love.graphics.newImage("assets/sprites/player/flashlight_idle.png")
 
 local SPEED = 150 -- pixels per second
 local SCALE = 0.35
+local ANIMATION_FPS = 15
 
 -- Point of the sprite the player rotates around: the center of the body,
 -- not the center of the image, which is offset by the extended arm
@@ -18,6 +19,7 @@ function Player.new(x, y)
     self.x = x
     self.y = y
     self.angle = 0
+    self.animation = Animation.new(idleSheet, 303, 223, 20, ANIMATION_FPS)
     return self
 end
 
@@ -47,10 +49,12 @@ function Player:update(dt)
     -- Face the mouse cursor
     local mouseX, mouseY = love.mouse.getPosition()
     self.angle = math.atan2(mouseY - self.y, mouseX - self.x)
+
+    self.animation:update(dt)
 end
 
 function Player:draw()
-    love.graphics.draw(sprite, frame, self.x, self.y, self.angle, SCALE, SCALE, PIVOT_X, PIVOT_Y)
+    self.animation:draw(self.x, self.y, self.angle, SCALE, PIVOT_X, PIVOT_Y)
 end
 
 return Player

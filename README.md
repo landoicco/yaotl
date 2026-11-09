@@ -7,9 +7,11 @@
 
 A top-down survival shooter made with [LÖVE](https://love2d.org/). Clear a house of zombies, wave after wave, with a single gun and limited ammo.
 
-*Yaotl* (Nahuatl, pronounced *YA-otl*) means "enemy" or "warrior".
-
 📄 See the [Game Design Document](docs/GDD.md) for the design.
+
+## 🪶 About the name
+
+*Yaotl* (pronounced *YA-otl*) is a Nahuatl word meaning **enemy**, and by extension **combat** or **war**. Some sources also translate it as **warrior**, which fits a game about a lone survivor facing a horde. See the entry in the [Gran Diccionario Náhuatl](https://gdn.iib.unam.mx/diccionario/yaotl/18899) (UNAM).
 
 ## 🚀 Running the game
 

@@ -32,6 +32,21 @@ Install [LÖVE 11.5](https://love2d.org/), then run from the project root:
 love .
 ```
 
+### 📦 Downloads
+
+Every pull request builds the game for Windows and Linux; the builds are under the run's *Artifacts* in the Actions tab. Tagged versions are published as [releases](https://github.com/landoicco/yaotl/releases).
+
+- **Windows:** unzip `yaotl-windows.zip` and run `yaotl.exe`.
+- **Linux:** make the AppImage executable (`chmod +x yaotl-linux.AppImage`) and run it. It needs FUSE 2 (`libfuse2`).
+
+### 🛠️ Building
+
+`tools/build.sh` builds the same files into `build/`. It needs `curl`, `zip`, `unzip` and `squashfs-tools`. With Nix:
+
+```bash
+nix shell nixpkgs#zip nixpkgs#unzip nixpkgs#squashfsTools --command tools/build.sh
+```
+
 ## 🔍 Checking the code
 
 CI rejects code that fails [luacheck](https://github.com/lunarmodules/luacheck) or [StyLua](https://github.com/JohnnyMorganz/StyLua). Both come with the Nix dev shell, at the same versions CI uses:

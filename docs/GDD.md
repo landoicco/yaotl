@@ -72,6 +72,9 @@ Rules:
 ### Distribution
 
 - A CI pipeline builds executables of the game for Linux and Windows.
+- Every pull request uploads its builds as artifacts, so each feature can be tested as players will run it.
+- Pushing a `v*` tag publishes a GitHub release with the builds.
+- The builds fuse the game into the official LÖVE binaries, pinned by checksum.
 
 ## 7. Assets
 

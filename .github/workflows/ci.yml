@@ -4,6 +4,7 @@ on:
   pull_request:
   push:
     branches: [master]
+    tags: ["v*"]
 
 jobs:
   lint:
@@ -16,3 +17,42 @@ jobs:
         run: nix develop --command luacheck .
       - name: StyLua
         run: nix develop --command stylua --check .
+
+  build:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install squashfs-tools
+        run: sudo apt-get update && sudo apt-get install -y squashfs-tools
+      - name: Build
+        run: tools/build.sh
+      # One artifact per platform, so testing one does not download the others
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaotl-windows
+          path: build/yaotl-windows.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaotl-linux
+          path: build/yaotl-linux.AppImage
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yaotl-love
+          path: build/yaotl.love
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Create release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" dist/* --repo "$GITHUB_REPOSITORY" --generate-notes

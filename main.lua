@@ -4,6 +4,9 @@ local player
 
 -- This function is called once at the beginning of the game
 function love.load()
+    -- Neutral floor tone so the dark sprites stay visible, until the map is drawn
+    love.graphics.setBackgroundColor(0.45, 0.45, 0.42)
+
     local windowWidth, windowHeight = love.graphics.getDimensions()
     player = Player.new(windowWidth / 2, windowHeight / 2)
 end

@@ -72,6 +72,9 @@ local ANIMATIONS = {
     },
 }
 
+-- Handgun muzzle, in sprite pixels from the origin
+local MUZZLE_X, MUZZLE_Y = 133, 38
+
 -- Movement within this angle of the aim walks forward, and beyond
 -- BACKWARD_LIMIT walks backwards. Anything in between strafes
 local FORWARD_LIMIT = math.pi / 4
@@ -96,10 +99,12 @@ local function normalizeAngle(angle)
     return (angle + math.pi) % (2 * math.pi) - math.pi
 end
 
-function Player.new(x, y)
+-- spawnBullet(x, y, angle) is called on every shot
+function Player.new(x, y, spawnBullet)
     local self = setmetatable({}, Player)
     self.x = x
     self.y = y
+    self.spawnBullet = spawnBullet
     self.aimAngle = 0
     self.feetAngle = 0
     self.feetReversed = false
@@ -121,6 +126,15 @@ end
 function Player:changeState(state)
     self.state = state
     state.enter(self)
+end
+
+-- Fire a bullet from the muzzle, rotated with the aim
+function Player:shoot()
+    local cos, sin = math.cos(self.aimAngle), math.sin(self.aimAngle)
+    local offsetX, offsetY = MUZZLE_X * SCALE, MUZZLE_Y * SCALE
+    local x = self.x + offsetX * cos - offsetY * sin
+    local y = self.y + offsetX * sin + offsetY * cos
+    self.spawnBullet(x, y, self.aimAngle)
 end
 
 function Player:keypressed(key)

@@ -82,6 +82,10 @@ end
 -- Firing a shot. Ready again once the shot animation ends
 local HandgunShooting = handgunState()
 
+function HandgunShooting.enter(player)
+    player:shoot()
+end
+
 function HandgunShooting.update(player, dt)
     if player.torso:isFinished() then
         player:changeState(states.handgunReady)

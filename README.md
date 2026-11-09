@@ -39,6 +39,8 @@ love .
 | Move | `W` `A` `S` `D` |
 | Aim | Mouse |
 | Shoot | Left click |
+| Reload | `R` |
+| Switch between handgun and flashlight | `Q` |
 
 ## 💡 Ideas
 

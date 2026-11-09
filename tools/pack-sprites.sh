@@ -14,6 +14,10 @@ COLUMNS=5
 ANIMATIONS=(
     "flashlight/idle:flashlight_idle"
     "flashlight/move:flashlight_move"
+    "handgun/idle:handgun_idle"
+    "handgun/move:handgun_move"
+    "handgun/shoot:handgun_shoot"
+    "handgun/reload:handgun_reload"
     "feet/idle:feet_idle"
     "feet/walk:feet_walk"
     "feet/strafe_left:feet_strafe_left"

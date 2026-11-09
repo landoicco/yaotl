@@ -1,16 +1,12 @@
--- A looping animation played from a grid spritesheet
+-- An animation played from a grid spritesheet, looping or played once
 local Animation = {}
 Animation.__index = Animation
 
--- The definition describes the spritesheet:
---   image                    grid spritesheet, frames read left to right, top to bottom
---   frameWidth, frameHeight  size of one frame
---   frameCount               number of frames
---   originX, originY         point of the frame the sprite is drawn and rotated around
-function Animation.new(definition, fps)
+-- definition: image, frameWidth, frameHeight, frameCount, originX, originY, fps, loops (default true)
+function Animation.new(definition)
     local self = setmetatable({}, Animation)
     self.definition = definition
-    self.fps = fps
+    self.loops = definition.loops ~= false
     self.time = 0
     self.frames = {}
 
@@ -27,25 +23,34 @@ function Animation.new(definition, fps)
         )
     end
 
+    self.duration = #self.frames / definition.fps
+
     return self
 end
 
 -- A negative dt plays the animation backwards
 function Animation:update(dt)
-    -- Wrap around the loop length so the timer never grows unbounded.
-    -- Lua's modulo takes the sign of the divisor, so the result stays positive
-    local duration = #self.frames / self.fps
-    self.time = (self.time + dt) % duration
+    if self.loops then
+        -- Wrap to the loop length; Lua's % keeps it positive when dt < 0
+        self.time = (self.time + dt) % self.duration
+    else
+        self.time = math.min(self.time + dt, self.duration)
+    end
 end
 
--- Restart from the first frame, e.g. when switching to this animation
+-- Restart from the first frame
 function Animation:reset()
     self.time = 0
 end
 
+-- True once a non-looping animation reaches its end
+function Animation:isFinished()
+    return not self.loops and self.time >= self.duration
+end
+
 function Animation:draw(x, y, angle, scale)
-    -- Clamp in case floating-point rounding lands exactly on the loop length
-    local index = math.min(math.floor(self.time * self.fps) + 1, #self.frames)
+    -- Clamp to the last frame
+    local index = math.min(math.floor(self.time * self.definition.fps) + 1, #self.frames)
     local definition = self.definition
     love.graphics.draw(
         definition.image, self.frames[index],

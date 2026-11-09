@@ -1,28 +1,51 @@
 local Animation = require("src.engine.animation")
+local states = require("src.game.player_states")
+local Weapon = require("src.game.weapon")
 
--- The survivor: moves with WASD, the torso faces the mouse cursor
--- and the feet face the direction of movement
+-- The survivor: the torso aims at the mouse, the feet follow the movement
 local Player = {}
 Player.__index = Player
 
 local SPEED = 150 -- pixels per second
 local SCALE = 0.35
-local ANIMATION_FPS = 15
+local DEFAULT_FPS = 15
 
 local SHEETS_DIR = "assets/sprites/player/"
 
--- Frame layout as printed by tools/pack-sprites.sh. The origin is the center
--- of the body, which for the torso is offset by the extended arm
+-- Layouts from tools/pack-sprites.sh; the origin is the center of the body
 local ANIMATIONS = {
-    torsoIdle = {
+    flashlightIdle = {
         sheet = "flashlight_idle.png",
         frameWidth = 303, frameHeight = 223, frameCount = 20,
         originX = 95, originY = 120,
     },
-    torsoMove = {
+    flashlightMove = {
         sheet = "flashlight_move.png",
         frameWidth = 305, frameHeight = 231, frameCount = 20,
         originX = 95, originY = 120,
+    },
+    handgunIdle = {
+        sheet = "handgun_idle.png",
+        frameWidth = 253, frameHeight = 216, frameCount = 20,
+        originX = 110, originY = 120,
+    },
+    handgunMove = {
+        sheet = "handgun_move.png",
+        frameWidth = 258, frameHeight = 220, frameCount = 20,
+        originX = 110, originY = 120,
+    },
+    handgunShoot = {
+        sheet = "handgun_shoot.png",
+        frameWidth = 255, frameHeight = 215, frameCount = 3,
+        originX = 110, originY = 120,
+        fps = 20, loops = false,
+    },
+    -- Sets the reload time: 15 frames at 15 fps = 1 s
+    handgunReload = {
+        sheet = "handgun_reload.png",
+        frameWidth = 260, frameHeight = 230, frameCount = 15,
+        originX = 110, originY = 120,
+        loops = false,
     },
     feetIdle = {
         sheet = "feet_idle.png",
@@ -46,14 +69,20 @@ local ANIMATIONS = {
     },
 }
 
--- Movement within this angle of the aim walks forward, and beyond
--- BACKWARD_LIMIT walks backwards. Anything in between strafes
+-- Handgun muzzle, in sprite pixels from the origin
+local MUZZLE_X, MUZZLE_Y = 133, 38
+
+local HANDGUN_MAGAZINE = 12
+local HANDGUN_RESERVE = 36
+
+-- Angles from the aim that separate walking forward, strafing and walking backwards
 local FORWARD_LIMIT = math.pi / 4
 local BACKWARD_LIMIT = 3 * math.pi / 4
 
 -- Load each spritesheet once, shared by every player
 for _, definition in pairs(ANIMATIONS) do
     definition.image = love.graphics.newImage(SHEETS_DIR .. definition.sheet)
+    definition.fps = definition.fps or DEFAULT_FPS
 end
 
 -- Switch to another animation, restarting it only when it actually changes
@@ -69,22 +98,52 @@ local function normalizeAngle(angle)
     return (angle + math.pi) % (2 * math.pi) - math.pi
 end
 
-function Player.new(x, y)
+-- spawnBullet(x, y, angle) is called on every shot
+function Player.new(x, y, spawnBullet)
     local self = setmetatable({}, Player)
     self.x = x
     self.y = y
+    self.spawnBullet = spawnBullet
+    self.weapon = Weapon.new(HANDGUN_MAGAZINE, HANDGUN_RESERVE)
     self.aimAngle = 0
     self.feetAngle = 0
     self.feetReversed = false
+    self.isMoving = false
 
     self.animations = {}
     for name, definition in pairs(ANIMATIONS) do
-        self.animations[name] = Animation.new(definition, ANIMATION_FPS)
+        self.animations[name] = Animation.new(definition)
     end
-    self.torso = self.animations.torsoIdle
+
+    -- The player starts with the handgun
+    self:changeState(states.handgunReady)
+    self.torso = self.animations[self.state.torso(self)]
     self.feet = self.animations.feetIdle
 
     return self
+end
+
+function Player:changeState(state)
+    self.state = state
+    state.enter(self)
+end
+
+-- Fire a bullet from the muzzle, rotated with the aim
+function Player:shoot()
+    local cos, sin = math.cos(self.aimAngle), math.sin(self.aimAngle)
+    local offsetX, offsetY = MUZZLE_X * SCALE, MUZZLE_Y * SCALE
+    local x = self.x + offsetX * cos - offsetY * sin
+    local y = self.y + offsetX * sin + offsetY * cos
+    self.weapon:consumeRound()
+    self.spawnBullet(x, y, self.aimAngle)
+end
+
+function Player:keypressed(key)
+    self.state.keypressed(self, key)
+end
+
+function Player:mousepressed(button)
+    self.state.mousepressed(self, button)
 end
 
 function Player:update(dt)
@@ -105,8 +164,8 @@ function Player:update(dt)
 
     -- Normalize so diagonal movement is not faster
     local length = math.sqrt(dirX * dirX + dirY * dirY)
-    local isMoving = length > 0
-    if isMoving then
+    self.isMoving = length > 0
+    if self.isMoving then
         self.x = self.x + dirX / length * SPEED * dt
         self.y = self.y + dirY / length * SPEED * dt
     end
@@ -115,13 +174,14 @@ function Player:update(dt)
     local mouseX, mouseY = love.mouse.getPosition()
     self.aimAngle = math.atan2(mouseY - self.y, mouseX - self.x)
 
-    local animations = self.animations
-    if isMoving then
-        self.torso = switchTo(self.torso, animations.torsoMove)
+    -- The state decides what the torso does
+    self.state.update(self, dt)
+    self.torso = switchTo(self.torso, self.animations[self.state.torso(self)])
+
+    if self.isMoving then
         self:updateFeet(math.atan2(dirY, dirX))
     else
-        self.torso = switchTo(self.torso, animations.torsoIdle)
-        self.feet = switchTo(self.feet, animations.feetIdle)
+        self.feet = switchTo(self.feet, self.animations.feetIdle)
         self.feetAngle = self.aimAngle
         self.feetReversed = false
     end
@@ -130,7 +190,7 @@ function Player:update(dt)
     self.feet:update(self.feetReversed and -dt or dt)
 end
 
--- Pick the feet animation and angle from the movement direction relative to the aim
+-- Feet animation and angle from the movement relative to the aim
 function Player:updateFeet(moveAngle)
     local animations = self.animations
     local relative = normalizeAngle(moveAngle - self.aimAngle)
@@ -140,12 +200,12 @@ function Player:updateFeet(moveAngle)
         self.feet = switchTo(self.feet, animations.feetWalk)
         self.feetAngle = moveAngle
     elseif math.abs(relative) >= BACKWARD_LIMIT then
-        -- Walking backwards: the feet face away from the movement and the walk plays in reverse
+        -- Backwards: feet face the aim, walk plays in reverse
         self.feet = switchTo(self.feet, animations.feetWalk)
         self.feetAngle = moveAngle + math.pi
         self.feetReversed = true
     elseif relative < 0 then
-        -- The strafe sprites step sideways, so the feet face perpendicular to the movement
+        -- Strafe sprites step sideways
         self.feet = switchTo(self.feet, animations.feetStrafeLeft)
         self.feetAngle = moveAngle + math.pi / 2
     else

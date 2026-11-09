@@ -38,6 +38,13 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 
 - Design patterns come from Robert Nystrom's [*Game Programming Patterns*](https://gameprogrammingpatterns.com/).
 - A pattern is introduced only when the project's complexity calls for it, and it is documented here when that happens.
+- Design decisions are recorded as [Architecture Decision Records](adr/README.md).
+
+### Patterns in use
+
+| Pattern | Where | Decision |
+|---|---|---|
+| State (hierarchical) | Player states | [ADR 0001](adr/0001-player-state-machine.md) |
 
 ### Code structure
 

@@ -1,27 +1,30 @@
 #!/usr/bin/env bash
-# Packs the loose animation frames from the asset pack into one grid
+# Packs the loose animation frames from the asset packs into one grid
 # spritesheet per animation.
 #
 # Requires ImageMagick. Run it from the project root without installing it:
 #   nix shell nixpkgs#imagemagick -c ./tools/pack-sprites.sh
 set -euo pipefail
 
-SOURCE_DIR="assets_local/Top_Down_Survivor"
-OUTPUT_DIR="assets/sprites/player"
+SOURCE_DIR="assets_local"
+OUTPUT_DIR="assets/sprites"
 COLUMNS=5
 
-# "<folder in the pack>:<spritesheet name in the game>"
+# "<frames, relative to SOURCE_DIR>:<spritesheet, relative to OUTPUT_DIR>"
 ANIMATIONS=(
-    "flashlight/idle:flashlight_idle"
-    "flashlight/move:flashlight_move"
-    "handgun/idle:handgun_idle"
-    "handgun/move:handgun_move"
-    "handgun/shoot:handgun_shoot"
-    "handgun/reload:handgun_reload"
-    "feet/idle:feet_idle"
-    "feet/walk:feet_walk"
-    "feet/strafe_left:feet_strafe_left"
-    "feet/strafe_right:feet_strafe_right"
+    "Top_Down_Survivor/flashlight/idle/*.png:player/flashlight_idle"
+    "Top_Down_Survivor/flashlight/move/*.png:player/flashlight_move"
+    "Top_Down_Survivor/handgun/idle/*.png:player/handgun_idle"
+    "Top_Down_Survivor/handgun/move/*.png:player/handgun_move"
+    "Top_Down_Survivor/handgun/shoot/*.png:player/handgun_shoot"
+    "Top_Down_Survivor/handgun/reload/*.png:player/handgun_reload"
+    "Top_Down_Survivor/feet/idle/*.png:player/feet_idle"
+    "Top_Down_Survivor/feet/walk/*.png:player/feet_walk"
+    "Top_Down_Survivor/feet/strafe_left/*.png:player/feet_strafe_left"
+    "Top_Down_Survivor/feet/strafe_right/*.png:player/feet_strafe_right"
+    "tds_zombie/export/skeleton-idle_*.png:zombie/idle"
+    "tds_zombie/export/skeleton-move_*.png:zombie/move"
+    "tds_zombie/export/skeleton-attack_*.png:zombie/attack"
 )
 
 if ! command -v montage >/dev/null; then
@@ -29,19 +32,19 @@ if ! command -v montage >/dev/null; then
     exit 1
 fi
 
-mkdir -p "$OUTPUT_DIR"
-
 for entry in "${ANIMATIONS[@]}"; do
-    source="${entry%%:*}"
+    pattern="${entry%%:*}"
     name="${entry##*:}"
+    output="$OUTPUT_DIR/$name.png"
 
-    # Natural sort, so frame_10 comes after frame_9
-    mapfile -t frames < <(printf '%s\n' "$SOURCE_DIR/$source"/*.png | sort -V)
+    # Unquoted so the glob expands; natural sort puts frame_10 after frame_9
+    # shellcheck disable=SC2086
+    mapfile -t frames < <(printf '%s\n' $SOURCE_DIR/$pattern | sort -V)
     count=${#frames[@]}
     columns=$((count < COLUMNS ? count : COLUMNS))
 
-    montage "${frames[@]}" -tile "${columns}x" -geometry +0+0 -background none \
-        "$OUTPUT_DIR/$name.png"
+    mkdir -p "$(dirname "$output")"
+    montage "${frames[@]}" -tile "${columns}x" -geometry +0+0 -background none "$output"
 
     echo "$name: $count frames of $(identify -format '%wx%h' "${frames[0]}"), $columns columns"
 done

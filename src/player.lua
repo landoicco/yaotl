@@ -3,6 +3,8 @@ local Player = {}
 Player.__index = Player
 
 local sprite = love.graphics.newImage("assets/sprites/player/flashlight_idle.png")
+-- First frame of the spritesheet, until animations are added
+local frame = love.graphics.newQuad(0, 0, 303, 223, sprite:getDimensions())
 
 local SPEED = 150 -- pixels per second
 local SCALE = 0.35
@@ -48,7 +50,7 @@ function Player:update(dt)
 end
 
 function Player:draw()
-    love.graphics.draw(sprite, self.x, self.y, self.angle, SCALE, SCALE, PIVOT_X, PIVOT_Y)
+    love.graphics.draw(sprite, frame, self.x, self.y, self.angle, SCALE, SCALE, PIVOT_X, PIVOT_Y)
 end
 
 return Player

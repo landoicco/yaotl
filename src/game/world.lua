@@ -17,9 +17,30 @@ local function updateAll(entities, dt)
     end
 end
 
+-- Bullets are points; zombies are circles
+local function isHitting(bullet, zombie)
+    local dx, dy = bullet.x - zombie.x, bullet.y - zombie.y
+    return dx * dx + dy * dy <= zombie.radius * zombie.radius
+end
+
+-- Each bullet hits at most one living zombie
+local function resolveHits(bullets, zombies)
+    for _, bullet in ipairs(bullets) do
+        for _, zombie in ipairs(zombies) do
+            if not bullet.isDead and zombie:isAlive() and isHitting(bullet, zombie) then
+                zombie:takeHit()
+                bullet.isDead = true
+            end
+        end
+    end
+end
+
 local function drawAll(entities)
     for _, entity in ipairs(entities) do
-        entity:draw()
+        -- Hits mark entities dead after their update; removal waits for the next frame
+        if not entity.isDead then
+            entity:draw()
+        end
     end
 end
 
@@ -51,8 +72,9 @@ end
 
 function World:update(dt)
     self.player:update(dt)
-    updateAll(self.zombies, dt)
     updateAll(self.bullets, dt)
+    resolveHits(self.bullets, self.zombies)
+    updateAll(self.zombies, dt)
 end
 
 function World:draw()

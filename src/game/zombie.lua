@@ -9,6 +9,10 @@ local SCALE = 0.35
 local DEFAULT_FPS = 15
 -- Stops at this distance from the target instead of overlapping it
 local REACH = 30
+local HEALTH = 3 -- handgun shots to kill
+-- Body size for collisions, in pixels after scaling
+local RADIUS = 25
+local FADE_DURATION = 0.3 -- seconds
 
 local SHEETS_DIR = "assets/sprites/zombie/"
 
@@ -39,6 +43,10 @@ function Zombie.new(x, y, target)
     self.y = y
     self.target = target
     self.angle = 0
+    self.radius = RADIUS
+    self.health = HEALTH
+    -- Counts down once health reaches 0; the zombie is removed at 0
+    self.fadeTime = FADE_DURATION
     self.isDead = false
 
     self.animations = {}
@@ -50,7 +58,22 @@ function Zombie.new(x, y, target)
     return self
 end
 
+-- Dying zombies are fading out and no longer take hits
+function Zombie:isAlive()
+    return self.health > 0
+end
+
+function Zombie:takeHit()
+    self.health = self.health - 1
+end
+
 function Zombie:update(dt)
+    if not self:isAlive() then
+        self.fadeTime = self.fadeTime - dt
+        self.isDead = self.fadeTime <= 0
+        return
+    end
+
     local dx, dy = self.target.x - self.x, self.target.y - self.y
     local distance = math.sqrt(dx * dx + dy * dy)
     self.angle = math.atan2(dy, dx)
@@ -70,7 +93,10 @@ function Zombie:update(dt)
 end
 
 function Zombie:draw()
+    love.graphics.push("all")
+    love.graphics.setColor(1, 1, 1, math.max(self.fadeTime / FADE_DURATION, 0))
     self.animation:draw(self.x, self.y, self.angle, SCALE)
+    love.graphics.pop()
 end
 
 return Zombie

@@ -25,6 +25,7 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 ## 4. Enemies
 
 - Zombies, arriving in waves.
+- A zombie takes three handgun shots to kill, and fades out when it dies.
 - They enter the house through doors and windows.
 - They navigate the house toward the player using a flow field.
 

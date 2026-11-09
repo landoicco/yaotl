@@ -7,3 +7,4 @@ Records are numbered in order and never deleted. A decision that changes gets a 
 | # | Decision | Status |
 |---|---|---|
 | [0001](0001-player-state-machine.md) | Player states as a hierarchical state machine | Accepted |
+| [0002](0002-shared-weapon-states.md) | One set of states for every weapon | Accepted |

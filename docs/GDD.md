@@ -70,7 +70,7 @@ The scope stays small, so that everything in the game is finished and polished.
 
 | Pattern | Where | Decision |
 |---|---|---|
-| State (hierarchical) | Player states | [ADR 0001](adr/0001-player-state-machine.md) |
+| State (hierarchical) | Player states, shared by every weapon | [ADR 0001](adr/0001-player-state-machine.md), [ADR 0002](adr/0002-shared-weapon-states.md) |
 | Update Method | The world updates every entity and removes the dead ones | — |
 | Flyweight | Animation frames are shared by every instance of a spritesheet | — |
 

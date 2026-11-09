@@ -1,6 +1,6 @@
 # 0001. Player states as a hierarchical state machine
 
-**Status:** Accepted
+**Status:** Accepted. Its handgun states are generalized to every weapon by [ADR 0002](0002-shared-weapon-states.md).
 
 ## Context
 

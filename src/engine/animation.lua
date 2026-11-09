@@ -34,6 +34,32 @@ function Animation.new(definition)
     return self
 end
 
+-- Load each definition's spritesheet once, from dir + sheet; fps defaults to defaultFps
+function Animation.loadDefinitions(dir, definitions, defaultFps)
+    for _, definition in pairs(definitions) do
+        definition.image = love.graphics.newImage(dir .. definition.sheet)
+        definition.fps = definition.fps or defaultFps
+    end
+    return definitions
+end
+
+-- One animation per definition, under the same names
+function Animation.newSet(definitions)
+    local set = {}
+    for name, definition in pairs(definitions) do
+        set[name] = Animation.new(definition)
+    end
+    return set
+end
+
+-- The animation to play next, restarted only when it differs from the current one
+function Animation.switch(current, nextAnimation)
+    if nextAnimation ~= current then
+        nextAnimation:reset()
+    end
+    return nextAnimation
+end
+
 -- A negative dt plays the animation backwards
 function Animation:update(dt)
     if self.loops then

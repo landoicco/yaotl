@@ -26,7 +26,9 @@ The scope stays small, so that everything in the game is finished and polished.
 
 - Moves with WASD. The torso faces the mouse cursor and the feet follow the movement: walking, walking backwards or strafing.
 - Starts with only the flashlight.
-- Once the handgun is found, holds either the handgun or the flashlight, and switches between them with `Q`.
+- Holds one thing at a time: the flashlight or a weapon.
+- `Q` switches between the flashlight and the last weapon used, so choosing between light and defense takes a single key.
+- `1` and `2` take out the handgun or the shotgun directly, once found.
 - Survives five zombie hits.
 
 ## 4. Light
@@ -34,13 +36,14 @@ The scope stays small, so that everything in the game is finished and polished.
 - The place is dark. The flashlight is the only real source of light.
 - The flashlight casts a cone of light in the direction the player aims.
 - Its battery runs down, and the light flickers more and more as it gets low.
-- With the handgun out, the player is in the dark: only the flash of each shot lights the surroundings for an instant.
+- With a weapon out, the player is in the dark: only the flash of each shot lights the surroundings for an instant.
 - Seeing and defending become a trade-off: the player cannot light the way and shoot at the same time.
 
-## 5. Weapon
+## 5. Weapons
 
 - The handgun is found early on, while escaping the first zombie.
-- Limited ammo, with reloading.
+- The shotgun is found after the handgun. It fires a spread of pellets, and its shots give a bigger flash.
+- Each weapon has its own limited ammo, with reloading.
 - Reloading is manual, with `R`, and never automatic: the player has to remember to reload.
 
 ## 6. Enemies

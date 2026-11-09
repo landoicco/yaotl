@@ -1,4 +1,4 @@
-local Player = require("src.player")
+local Player = require("src.game.player")
 
 local player
 

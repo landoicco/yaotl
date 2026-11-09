@@ -64,13 +64,13 @@ stylua --check .  # or `stylua .` to format
 | Aim | Mouse |
 | Shoot | Left click |
 | Reload | `R` |
-| Switch between handgun and flashlight | `Q` |
+| Switch between the flashlight and the last weapon | `Q` |
+| Take out the handgun / shotgun | `1` / `2` |
 
 ## 💡 Ideas
 
 Under consideration, not yet part of the design:
 
-- 🔫 **Finding a shotgun.** A second weapon, found after the handgun.
 - 🧪 **Zombie variants by recoloring.** One zombie sprite, with each type getting its own color (a tint or a shader) and scale, so new types need no new art.
 - 🍎 **A macOS build.** Built from LÖVE's official `love.app` like the Windows and Linux ones. It would not be signed, so macOS would ask players to allow it by hand.
 - 🔋 **Pickups.** Batteries for the flashlight, health and ammo, found along the way.

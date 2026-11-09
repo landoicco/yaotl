@@ -25,9 +25,10 @@ function MuzzleFlash.new()
 end
 
 -- Light up at the muzzle; the flash stays where the shot was fired
-function MuzzleFlash:fire(x, y)
+-- size scales the range, so bigger guns light up more
+function MuzzleFlash:fire(x, y, size)
     self.light.x, self.light.y = x, y
-    self.light.range = RANGE * (1 + (love.math.random() * 2 - 1) * RANGE_JITTER)
+    self.light.range = RANGE * size * (1 + (love.math.random() * 2 - 1) * RANGE_JITTER)
     self.remaining = DURATION
 end
 

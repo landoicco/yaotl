@@ -34,7 +34,22 @@ local ANIMATIONS = {
         frameWidth = 172, frameHeight = 124, frameCount = 20,
         originX = 86, originY = 62,
     },
+    feetStrafeLeft = {
+        sheet = "feet_strafe_left.png",
+        frameWidth = 155, frameHeight = 174, frameCount = 20,
+        originX = 77, originY = 87,
+    },
+    feetStrafeRight = {
+        sheet = "feet_strafe_right.png",
+        frameWidth = 154, frameHeight = 176, frameCount = 20,
+        originX = 77, originY = 88,
+    },
 }
+
+-- Movement within this angle of the aim walks forward, and beyond
+-- BACKWARD_LIMIT walks backwards. Anything in between strafes
+local FORWARD_LIMIT = math.pi / 4
+local BACKWARD_LIMIT = 3 * math.pi / 4
 
 -- Load each spritesheet once, shared by every player
 for _, definition in pairs(ANIMATIONS) do
@@ -49,12 +64,18 @@ local function switchTo(current, nextAnimation)
     return nextAnimation
 end
 
+-- Wrap an angle to the range [-pi, pi)
+local function normalizeAngle(angle)
+    return (angle + math.pi) % (2 * math.pi) - math.pi
+end
+
 function Player.new(x, y)
     local self = setmetatable({}, Player)
     self.x = x
     self.y = y
     self.aimAngle = 0
     self.feetAngle = 0
+    self.feetReversed = false
 
     self.animations = {}
     for name, definition in pairs(ANIMATIONS) do
@@ -94,24 +115,43 @@ function Player:update(dt)
     local mouseX, mouseY = love.mouse.getPosition()
     self.aimAngle = math.atan2(mouseY - self.y, mouseX - self.x)
 
-    -- The feet face the movement, or the aim when standing still
-    if isMoving then
-        self.feetAngle = math.atan2(dirY, dirX)
-    else
-        self.feetAngle = self.aimAngle
-    end
-
     local animations = self.animations
     if isMoving then
         self.torso = switchTo(self.torso, animations.torsoMove)
-        self.feet = switchTo(self.feet, animations.feetWalk)
+        self:updateFeet(math.atan2(dirY, dirX))
     else
         self.torso = switchTo(self.torso, animations.torsoIdle)
         self.feet = switchTo(self.feet, animations.feetIdle)
+        self.feetAngle = self.aimAngle
+        self.feetReversed = false
     end
 
     self.torso:update(dt)
-    self.feet:update(dt)
+    self.feet:update(self.feetReversed and -dt or dt)
+end
+
+-- Pick the feet animation and angle from the movement direction relative to the aim
+function Player:updateFeet(moveAngle)
+    local animations = self.animations
+    local relative = normalizeAngle(moveAngle - self.aimAngle)
+
+    self.feetReversed = false
+    if math.abs(relative) <= FORWARD_LIMIT then
+        self.feet = switchTo(self.feet, animations.feetWalk)
+        self.feetAngle = moveAngle
+    elseif math.abs(relative) >= BACKWARD_LIMIT then
+        -- Walking backwards: the feet face away from the movement and the walk plays in reverse
+        self.feet = switchTo(self.feet, animations.feetWalk)
+        self.feetAngle = moveAngle + math.pi
+        self.feetReversed = true
+    elseif relative < 0 then
+        -- The strafe sprites step sideways, so the feet face perpendicular to the movement
+        self.feet = switchTo(self.feet, animations.feetStrafeLeft)
+        self.feetAngle = moveAngle + math.pi / 2
+    else
+        self.feet = switchTo(self.feet, animations.feetStrafeRight)
+        self.feetAngle = moveAngle - math.pi / 2
+    end
 end
 
 function Player:draw()

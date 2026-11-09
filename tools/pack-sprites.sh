@@ -16,6 +16,8 @@ ANIMATIONS=(
     "flashlight/move:flashlight_move"
     "feet/idle:feet_idle"
     "feet/walk:feet_walk"
+    "feet/strafe_left:feet_strafe_left"
+    "feet/strafe_right:feet_strafe_right"
 )
 
 if ! command -v montage >/dev/null; then

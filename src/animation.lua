@@ -30,8 +30,10 @@ function Animation.new(definition, fps)
     return self
 end
 
+-- A negative dt plays the animation backwards
 function Animation:update(dt)
-    -- Wrap around the loop length so the timer never grows unbounded
+    -- Wrap around the loop length so the timer never grows unbounded.
+    -- Lua's modulo takes the sign of the divisor, so the result stays positive
     local duration = #self.frames / self.fps
     self.time = (self.time + dt) % duration
 end

@@ -70,6 +70,11 @@ function Map.load(name)
     return self
 end
 
+-- Size in pixels
+function Map:getDimensions()
+    return self.width * self.tileSize, self.height * self.tileSize
+end
+
 function Map:draw()
     love.graphics.draw(self.batch)
 end

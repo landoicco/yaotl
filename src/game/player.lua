@@ -217,7 +217,8 @@ function Player:mousepressed(button)
     self.state.mousepressed(self, button)
 end
 
-function Player:update(dt)
+-- aimX, aimY: the world point the torso faces, usually under the mouse
+function Player:update(dt, aimX, aimY)
     -- Build the movement direction from the pressed keys
     local dirX, dirY = 0, 0
     if love.keyboard.isDown("w") then
@@ -241,9 +242,7 @@ function Player:update(dt)
         self.y = self.y + dirY / length * SPEED * dt
     end
 
-    -- The torso faces the mouse cursor
-    local mouseX, mouseY = love.mouse.getPosition()
-    self.aimAngle = math.atan2(mouseY - self.y, mouseX - self.x)
+    self.aimAngle = math.atan2(aimY - self.y, aimX - self.x)
 
     -- The state decides what the torso does
     self.state.update(self, dt)

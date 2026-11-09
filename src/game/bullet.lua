@@ -1,8 +1,9 @@
--- A bullet that flies straight until it leaves the screen
+-- A bullet that flies straight until it reaches its range
 local Bullet = {}
 Bullet.__index = Bullet
 
 local SPEED = 900 -- pixels per second
+local RANGE = 1000 -- pixels, so stray bullets do not fly forever
 local LENGTH = 10
 local WIDTH = 2
 local COLOR = { 1, 0.9, 0.5 }
@@ -13,16 +14,18 @@ function Bullet.new(x, y, angle)
     self.y = y
     self.dirX = math.cos(angle)
     self.dirY = math.sin(angle)
+    self.distance = 0 -- traveled so far
     self.isDead = false
     return self
 end
 
 function Bullet:update(dt)
-    self.x = self.x + self.dirX * SPEED * dt
-    self.y = self.y + self.dirY * SPEED * dt
+    local step = SPEED * dt
+    self.x = self.x + self.dirX * step
+    self.y = self.y + self.dirY * step
 
-    local width, height = love.graphics.getDimensions()
-    if self.x < 0 or self.x > width or self.y < 0 or self.y > height then
+    self.distance = self.distance + step
+    if self.distance >= RANGE then
         self.isDead = true
     end
 end

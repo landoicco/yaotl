@@ -1,5 +1,6 @@
 local Player = require("src.game.player")
 local Bullet = require("src.game.bullet")
+local Camera = require("src.game.camera")
 local Lighting = require("src.game.lighting")
 local Map = require("src.game.map")
 local Zombie = require("src.game.zombie")
@@ -65,6 +66,9 @@ function World.new()
         self:spawnZombie(zombieSpawn.x, zombieSpawn.y)
     end
 
+    self.camera = Camera.new(self.map:getDimensions())
+    self.camera:centerOn(spawn.x, spawn.y)
+
     return self
 end
 
@@ -77,7 +81,10 @@ function World:spawnBullet(x, y, angle)
 end
 
 function World:update(dt)
-    self.player:update(dt)
+    local player = self.player
+    -- Through last frame's view, which is the one on screen
+    player:update(dt, self.camera:toWorld(love.mouse.getPosition()))
+    self.camera:follow(player.x, player.y, dt)
     updateAll(self.bullets, dt)
     resolveHits(self.bullets, self.zombies)
     updateAll(self.zombies, dt)
@@ -89,6 +96,7 @@ function World:isOver()
 end
 
 function World:draw()
+    self.camera:attach()
     self.map:draw()
     drawAll(self.zombies)
     self.player:draw()
@@ -99,6 +107,7 @@ function World:draw()
 
     -- Tracers glow, so the darkness does not cover them
     drawAll(self.bullets)
+    self.camera:detach()
 end
 
 function World:keypressed(key)

@@ -33,14 +33,15 @@ build_love() {
 }
 
 # Fused executable: love.exe with the game appended, next to LÖVE's DLLs
+# The folder is kept for CI artifacts, which are zipped on upload
 build_windows() {
     fetch "$WINDOWS_ZIP" "$WINDOWS_SHA256"
     unzip -q "$CACHE/$WINDOWS_ZIP" -d "$WORK"
-    local love="$WORK/love-$LOVE_VERSION-win64" game="$WORK/yaotl"
+    local love="$WORK/love-$LOVE_VERSION-win64" game="$BUILD/yaotl-windows"
     mkdir "$game"
     cat "$love/love.exe" "$BUILD/yaotl.love" >"$game/yaotl.exe"
     cp "$love"/*.dll "$love/license.txt" "$game"
-    (cd "$WORK" && zip -9 -q -r -X "$BUILD/yaotl-windows.zip" yaotl)
+    (cd "$BUILD" && zip -9 -q -r -X yaotl-windows.zip yaotl-windows)
 }
 
 # The AppImage is an ELF runtime followed by a squashfs; the squashfs starts where the ELF ends

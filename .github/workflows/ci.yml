@@ -28,10 +28,11 @@ jobs:
       - name: Build
         run: tools/build.sh
       # One artifact per platform, so testing one does not download the others
+      # Windows uploads the folder: artifacts are zipped, and a zip inside a zip won't run
       - uses: actions/upload-artifact@v4
         with:
           name: yaotl-windows
-          path: build/yaotl-windows.zip
+          path: build/yaotl-windows/
       - uses: actions/upload-artifact@v4
         with:
           name: yaotl-linux
@@ -40,6 +41,11 @@ jobs:
         with:
           name: yaotl-love
           path: build/yaotl.love
+      # The release attaches the zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-windows
+          path: build/yaotl-windows.zip
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
@@ -48,8 +54,10 @@ jobs:
     permissions:
       contents: write
     steps:
+      # Skips the unzipped Windows folder
       - uses: actions/download-artifact@v4
         with:
+          pattern: "{yaotl-linux,yaotl-love,release-windows}"
           path: dist
           merge-multiple: true
       - name: Create release

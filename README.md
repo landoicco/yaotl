@@ -36,7 +36,7 @@ love .
 
 Every pull request builds the game for Windows and Linux; the builds are under the run's *Artifacts* in the Actions tab. Tagged versions are published as [releases](https://github.com/landoicco/yaotl/releases).
 
-- **Windows:** unzip `yaotl-windows.zip` and run `yaotl.exe`.
+- **Windows:** extract the whole zip first, then run `yaotl.exe`; it does not run from inside the zip.
 - **Linux:** make the AppImage executable (`chmod +x yaotl-linux.AppImage`) and run it. It needs FUSE 2 (`libfuse2`).
 
 ### 🛠️ Building

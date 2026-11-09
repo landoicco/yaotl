@@ -25,6 +25,9 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 ## 4. Enemies
 
 - Zombies, arriving in waves.
+- A zombie takes three handgun shots to kill, and fades out when it dies.
+- Up close, a zombie swings at the player. Stepping back before the arms close dodges the hit.
+- The player survives five zombie hits.
 - They enter the house through doors and windows.
 - They navigate the house toward the player using a flow field.
 
@@ -45,6 +48,8 @@ A survivor has to clear a house overrun by zombies, wave after wave. The scope s
 | Pattern | Where | Decision |
 |---|---|---|
 | State (hierarchical) | Player states | [ADR 0001](adr/0001-player-state-machine.md) |
+| Update Method | The world updates every entity and removes the dead ones | — |
+| Flyweight | Animation frames are shared by every instance of a spritesheet | — |
 
 ### Code structure
 

@@ -46,7 +46,6 @@ love .
 
 Under consideration, not yet part of the design:
 
-- 🎨 **Zombies by [Riley Gombart](https://opengameart.org/users/rileygombart).** The player already uses his survivor sprites, and his animated zombie would match their style.
 - 🔫 **Finding a shotgun.** The player starts with the handgun and finds a shotgun later on.
 - 🧪 **Zombie variants by recoloring.** One zombie sprite, with each type getting its own color (a tint or a shader) and scale, so new types need no new art.
 - 🔦 **A dark house.** The house stays in darkness and the player only sees what the flashlight and a few fixed lights (lamps, windows) reveal. This adds tension and gives assets from different sources a unified look.
@@ -57,3 +56,4 @@ All art and audio come from free third-party assets. Each one is credited here w
 | Asset | Author | Source | License |
 |---|---|---|---|
 | Survivor sprites | rileygombart | [Animated Top Down Survivor Player](https://opengameart.org/content/animated-top-down-survivor-player) | [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
+| Zombie sprites | rileygombart | [Animated Top Down Zombie](https://opengameart.org/content/animated-top-down-zombie) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |

@@ -21,16 +21,24 @@
           inputsFrom = [ lint ];
           packages = [ pkgs.love pkgs.gh pkgs.tiled pkgs.imagemagick ];
           shellHook = ''
-            echo "Yaotl dev shell"
-            echo "💘 love ${pkgs.love.version}"
-            echo "🐙 gh ${pkgs.gh.version}"
-            echo "🔍 luacheck ${pkgs.luajitPackages.luacheck.version}"
-            echo "🎨 stylua ${pkgs.stylua.version}"
-            echo "🗺️ tiled ${pkgs.tiled.version}"
-            echo "🖼️ imagemagick ${pkgs.imagemagick.version}"
-            echo "Run the game with: love ."
-            echo "Check the code with: luacheck . && stylua --check ."
-            echo "Edit maps with: tiled maps/"
+            echo ""
+            echo "━━━━━━━━━━━━━━ 🧟 Yaotl dev shell ━━━━━━━━━━━━━━"
+            echo ""
+            echo "  Dev"
+            echo "    💘 love         ${pkgs.love.version}"
+            echo "    🐙 gh           ${pkgs.gh.version}"
+            echo "    🗺️  tiled        ${pkgs.tiled.version}"
+            echo "    🖼️  imagemagick  ${pkgs.imagemagick.version}"
+            echo ""
+            echo "  Lint (also in CI, via .#lint)"
+            echo "    🔍 luacheck     ${pkgs.luajitPackages.luacheck.version}"
+            echo "    🎨 stylua       ${pkgs.stylua.version}"
+            echo ""
+            echo "  Commands"
+            echo "    love .                            run the game"
+            echo "    luacheck . && stylua --check .    check the code"
+            echo "    tiled maps/sandbox.tmx            edit the sandbox map"
+            echo ""
           '';
         };
       });

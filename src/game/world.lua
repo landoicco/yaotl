@@ -42,6 +42,27 @@ local function resolveHits(bullets, zombies)
     end
 end
 
+-- A melee blow reaches zombies this close to the striker, center to center
+local MELEE_RANGE = 70
+-- ...and within this angle to either side of where the striker faces
+local MELEE_ARC = math.pi / 4
+
+-- Shove every living zombie in reach of a melee blow, unless a wall is in between
+function World:strike(x, y, angle)
+    local cosArc = math.cos(MELEE_ARC)
+    for _, zombie in ipairs(self.zombies) do
+        local dx, dy = zombie.x - x, zombie.y - y
+        local distance = math.sqrt(dx * dx + dy * dy)
+        if zombie:isAlive() and distance > 0 and distance <= MELEE_RANGE then
+            local dirX, dirY = dx / distance, dy / distance
+            local isInFront = dirX * math.cos(angle) + dirY * math.sin(angle) >= cosArc
+            if isInFront and not self.map:castRay(x, y, dirX, dirY, distance) then
+                zombie:shove(dirX, dirY)
+            end
+        end
+    end
+end
+
 local function drawAll(entities)
     for _, entity in ipairs(entities) do
         -- Hits mark entities dead after their update; removal waits for the next frame
@@ -62,6 +83,8 @@ function World.new()
     local spawn = self.map.playerSpawn
     self.player = Player.new(spawn.x, spawn.y, self.map, function(x, y, angle)
         self:spawnBullet(x, y, angle)
+    end, function(x, y, angle)
+        self:strike(x, y, angle)
     end)
 
     for _, zombieSpawn in ipairs(self.map.zombieSpawns) do

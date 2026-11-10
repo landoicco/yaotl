@@ -1,11 +1,13 @@
 -- Player states, a hierarchical state machine (see docs/adr/0001-player-state-machine.md)
 -- The weapon states serve every weapon (see docs/adr/0002-shared-weapon-states.md)
+-- Melee strikes are substates of whatever is held (see docs/adr/0005-melee-states.md)
 -- Each state implements: enter, update, keypressed, mousepressed, torso
 local states = {}
 
 local SWITCH_KEY = "q"
 local RELOAD_KEY = "r"
 local SHOOT_BUTTON = 1
+local MELEE_BUTTON = 2
 -- Key that takes out each weapon
 local WEAPON_KEYS = { ["1"] = "handgun", ["2"] = "shotgun" }
 
@@ -15,8 +17,23 @@ local function takeOut(player, weaponName)
     player:changeState(states.weaponReady)
 end
 
--- Holding the flashlight: lights the way, but cannot shoot
+-- A melee swing with whatever is held; back to readyState once the swing ends
+local function startMelee(player)
+    player:startMelee()
+end
+
+local function updateMelee(player, readyState)
+    player:updateMelee()
+    if player.torso:isFinished() then
+        player:changeState(readyState)
+    end
+end
+
+-- Holding the flashlight: lights the way, but cannot shoot. Superstate of the flashlight melee
 local Flashlight = {}
+
+-- The flashlight stays on in every flashlight state
+Flashlight.holdsFlashlight = true
 
 function Flashlight.enter(player) end
 
@@ -31,10 +48,30 @@ function Flashlight.keypressed(player, key)
     end
 end
 
-function Flashlight.mousepressed(player, button) end
+function Flashlight.mousepressed(player, button)
+    if button == MELEE_BUTTON then
+        player:changeState(states.flashlightMelee)
+    end
+end
 
 function Flashlight.torso(player)
     return player.isMoving and "flashlightMove" or "flashlightIdle"
+end
+
+-- Punching with the free hand, the flashlight still lit
+local FlashlightMelee = setmetatable({}, { __index = Flashlight })
+
+FlashlightMelee.enter = startMelee
+
+function FlashlightMelee.update(player, dt)
+    updateMelee(player, states.flashlight)
+end
+
+-- No new swing until this one ends
+function FlashlightMelee.mousepressed(player, button) end
+
+function FlashlightMelee.torso(player)
+    return "flashlightMelee"
 end
 
 -- Holding a weapon. Superstate of the weapon states below
@@ -44,7 +81,7 @@ function Armed.enter(player) end
 
 function Armed.update(player, dt) end
 
--- Works from every weapon substate, cancelling a reload
+-- Works from every weapon substate, cancelling a reload or a swing
 function Armed.keypressed(player, key)
     local weaponName = WEAPON_KEYS[key]
     if key == SWITCH_KEY then
@@ -61,7 +98,7 @@ local function weaponState()
     return setmetatable({}, { __index = Armed })
 end
 
--- Aiming, ready to shoot or reload
+-- Aiming, ready to shoot, strike or reload
 local WeaponReady = weaponState()
 
 function WeaponReady.keypressed(player, key)
@@ -75,6 +112,8 @@ end
 function WeaponReady.mousepressed(player, button)
     if button == SHOOT_BUTTON and player.weapon:canShoot() then
         player:changeState(states.weaponShooting)
+    elseif button == MELEE_BUTTON then
+        player:changeState(states.weaponMelee)
     end
 end
 
@@ -99,6 +138,19 @@ function WeaponShooting.torso(player)
     return player.weapon:animation("Shoot")
 end
 
+-- Striking with the weapon's butt
+local WeaponMelee = weaponState()
+
+WeaponMelee.enter = startMelee
+
+function WeaponMelee.update(player, dt)
+    updateMelee(player, states.weaponReady)
+end
+
+function WeaponMelee.torso(player)
+    return player.weapon:animation("Melee")
+end
+
 -- Reloading. Cannot shoot until the reload animation ends
 local WeaponReloading = weaponState()
 
@@ -115,8 +167,10 @@ function WeaponReloading.torso(player)
 end
 
 states.flashlight = Flashlight
+states.flashlightMelee = FlashlightMelee
 states.weaponReady = WeaponReady
 states.weaponShooting = WeaponShooting
+states.weaponMelee = WeaponMelee
 states.weaponReloading = WeaponReloading
 
 return states

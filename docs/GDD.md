@@ -53,7 +53,7 @@ The scope stays small, so that everything in the game is finished and polished.
 - A zombie takes three handgun shots to kill, and fades out when it dies.
 - Up close, a zombie swings at the player. Stepping back before the arms close dodges the hit.
 - Zombies are slower than the player, so running away is always an option.
-- They navigate toward the player using a flow field.
+- They navigate toward the player using a flow field, and walk straight at them when nothing is in the way ([ADR 0004](adr/0004-zombie-navigation.md)).
 
 ## 7. World
 

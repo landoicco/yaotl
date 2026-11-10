@@ -19,6 +19,10 @@ local RADIUS = 25
 local FADE_DURATION = 0.3 -- seconds
 -- Rays that check a straight walk: the center of the body, then its left and right edges
 local BODY_SIDES = { 0, -1, 1 }
+-- A melee shove throws the zombie back and leaves it reeling for a moment
+local SHOVE_SPEED = 500 -- pixels per second at the start
+local SHOVE_DECAY = 10 -- how fast it slows down; the shove covers SHOVE_SPEED / SHOVE_DECAY = 50 px
+local STAGGER_DURATION = 0.4 -- seconds
 
 local SHEETS_DIR = "assets/sprites/zombie/"
 
@@ -64,6 +68,9 @@ function Zombie.new(x, y, target, map, flowField)
     self.isDead = false
     -- Whether the current swing already landed or missed
     self.hasHit = false
+    -- Seconds left reeling from a shove, and the speed it was thrown back at
+    self.staggerTime = 0
+    self.shoveX, self.shoveY = 0, 0
 
     self.animations = Animation.newSet(ANIMATIONS)
     self.animation = self.animations.idle
@@ -80,10 +87,34 @@ function Zombie:takeHit()
     self.health = self.health - 1
 end
 
+-- A melee blow: it hurts, throws the zombie back along dirX, dirY and cuts its swing short
+function Zombie:shove(dirX, dirY)
+    self:takeHit()
+    self.staggerTime = STAGGER_DURATION
+    self.shoveX, self.shoveY = dirX * SHOVE_SPEED, dirY * SHOVE_SPEED
+    self:switchTo(self.animations.idle)
+end
+
+-- Sliding back from a shove, slowing down; walls stop it like they stop a walk
+-- Moves by the exact distance the decaying speed covers this frame, so the shove is the same at any frame rate
+function Zombie:updateStagger(dt)
+    self.staggerTime = self.staggerTime - dt
+    local slowdown = math.exp(-SHOVE_DECAY * dt)
+    local travel = (1 - slowdown) / SHOVE_DECAY
+    self.x, self.y = self.map:pushOut(self.x + self.shoveX * travel, self.y + self.shoveY * travel, self.radius)
+    self.shoveX, self.shoveY = self.shoveX * slowdown, self.shoveY * slowdown
+end
+
 function Zombie:update(dt)
     if not self:isAlive() then
         self.fadeTime = self.fadeTime - dt
         self.isDead = self.fadeTime <= 0
+        return
+    end
+
+    if self.staggerTime > 0 then
+        self:updateStagger(dt)
+        self.animation:update(dt)
         return
     end
 

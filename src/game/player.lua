@@ -31,6 +31,26 @@ local ANIMATIONS = {
         frameWidth = 305, frameHeight = 231, frameCount = 20,
         originX = 95, originY = 120,
     },
+    -- Melee strikes: 15 frames at 20 fps = 0.75 s; hitFrame is where the blow lands
+    -- With the flashlight, the free hand punches
+    flashlightMelee = {
+        sheet = "flashlight_melee.png",
+        frameWidth = 316, frameHeight = 246, frameCount = 15,
+        originX = 101, originY = 144,
+        fps = 20, loops = false, hitFrame = 9,
+    },
+    handgunMelee = {
+        sheet = "handgun_melee.png",
+        frameWidth = 291, frameHeight = 256, frameCount = 15,
+        originX = 117, originY = 124,
+        fps = 20, loops = false, hitFrame = 8,
+    },
+    shotgunMelee = {
+        sheet = "shotgun_melee.png",
+        frameWidth = 358, frameHeight = 353, frameCount = 15,
+        originX = 132, originY = 199,
+        fps = 20, loops = false, hitFrame = 9,
+    },
     handgunIdle = {
         sheet = "handgun_idle.png",
         frameWidth = 253, frameHeight = 216, frameCount = 20,
@@ -145,13 +165,17 @@ local function normalizeAngle(angle)
     return (angle + math.pi) % (2 * math.pi) - math.pi
 end
 
--- map: the walls the player cannot cross; spawnBullet(x, y, angle) is called on every shot
-function Player.new(x, y, map, spawnBullet)
+-- map: the walls the player cannot cross
+-- spawnBullet(x, y, angle) is called on every shot, strike(x, y, angle) when a melee blow lands
+function Player.new(x, y, map, spawnBullet, strike)
     local self = setmetatable({}, Player)
     self.x = x
     self.y = y
     self.map = map
     self.spawnBullet = spawnBullet
+    self.strike = strike
+    -- Whether the current melee swing already landed
+    self.hasStruck = false
     self.health = HEALTH
     self.weapons = {
         handgun = Weapon.new(WEAPONS.handgun),
@@ -223,8 +247,23 @@ function Player:shoot()
     self.muzzleFlash:fire(x, y, stats.flashSize)
 end
 
+function Player:startMelee()
+    self.hasStruck = false
+end
+
+-- Lands the blow once per swing, on the frame where it connects
+-- Only melee animations have a hit frame, so this waits until the swing is on screen
+function Player:updateMelee()
+    local hitFrame = self.torso.definition.hitFrame
+    if not self.hasStruck and hitFrame and self.torso:frameIndex() >= hitFrame then
+        self.hasStruck = true
+        self.strike(self.x, self.y, self.aimAngle)
+    end
+end
+
+-- The flashlight state and its substates hold it
 function Player:isHoldingFlashlight()
-    return self.state == states.flashlight
+    return self.state.holdsFlashlight == true
 end
 
 -- Add the lights the player gives off this frame

@@ -38,6 +38,7 @@ The scope stays small, so that everything in the game is finished and polished.
 - Its battery runs down, and the light flickers more and more as it gets low.
 - With a weapon out, the player is in the dark: only the flash of each shot lights the surroundings for an instant.
 - Seeing and defending become a trade-off: the player cannot light the way and shoot at the same time.
+- Walls block every light and cast shadows, so what lies around a corner stays hidden. How the lighting works is in [ADR 0003](adr/0003-lighting.md).
 
 ## 5. Weapons
 

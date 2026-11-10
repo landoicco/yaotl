@@ -39,9 +39,10 @@ function Lighting.litArea(light)
     return points
 end
 
+-- The camera only moves the view, so direction and range need no conversion, only the origin
 function Lighting:drawLight(light)
     local shader = self.shader
-    shader:send("origin", { light.x, light.y })
+    shader:send("origin", { love.graphics.transformPoint(light.x, light.y) })
     shader:send("direction", { math.cos(light.angle), math.sin(light.angle) })
     shader:send("range", light.range)
     if isPoint(light) then

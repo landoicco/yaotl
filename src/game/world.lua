@@ -1,6 +1,7 @@
 local Player = require("src.game.player")
 local Bullet = require("src.game.bullet")
 local Camera = require("src.game.camera")
+local FlowField = require("src.game.flow_field")
 local Lighting = require("src.game.lighting")
 local Map = require("src.game.map")
 local Zombie = require("src.game.zombie")
@@ -56,6 +57,7 @@ function World.new()
     self.zombies = {}
     self.map = Map.load("sandbox")
     self.lighting = Lighting.new(AMBIENT, self.map)
+    self.flowField = FlowField.new(self.map)
 
     local spawn = self.map.playerSpawn
     self.player = Player.new(spawn.x, spawn.y, self.map, function(x, y, angle)
@@ -73,7 +75,7 @@ function World.new()
 end
 
 function World:spawnZombie(x, y)
-    table.insert(self.zombies, Zombie.new(x, y, self.player, self.map))
+    table.insert(self.zombies, Zombie.new(x, y, self.player, self.map, self.flowField))
 end
 
 function World:spawnBullet(x, y, angle)
@@ -85,6 +87,7 @@ function World:update(dt)
     -- Through last frame's view, which is the one on screen
     player:update(dt, self.camera:toWorld(love.mouse.getPosition()))
     self.camera:follow(player.x, player.y, dt)
+    self.flowField:update(player.x, player.y)
     updateAll(self.bullets, dt)
     resolveHits(self.bullets, self.zombies)
     updateAll(self.zombies, dt)

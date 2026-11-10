@@ -1,6 +1,6 @@
 local Animation = require("src.engine.animation")
 
--- A zombie that walks straight at its target
+-- A zombie that hunts its target: straight at it when it can, around the walls when it cannot
 local Zombie = {}
 Zombie.__index = Zombie
 
@@ -17,6 +17,8 @@ local HEALTH = 3 -- handgun shots to kill
 -- Body size for collisions, in pixels after scaling
 local RADIUS = 25
 local FADE_DURATION = 0.3 -- seconds
+-- Rays that check a straight walk: the center of the body, then its left and right edges
+local BODY_SIDES = { 0, -1, 1 }
 
 local SHEETS_DIR = "assets/sprites/zombie/"
 
@@ -45,13 +47,15 @@ local ANIMATIONS = {
 -- Shared by every zombie
 Animation.loadDefinitions(SHEETS_DIR, ANIMATIONS, DEFAULT_FPS)
 
--- target: x, y and takeHit(), usually the player; map: the walls it cannot cross
-function Zombie.new(x, y, target, map)
+-- target: x, y and takeHit(), usually the player; map: the walls it cannot cross;
+-- flowField: the paths around the walls toward the target
+function Zombie.new(x, y, target, map, flowField)
     local self = setmetatable({}, Zombie)
     self.x = x
     self.y = y
     self.target = target
     self.map = map
+    self.flowField = flowField
     self.angle = 0
     self.radius = RADIUS
     self.health = HEALTH
@@ -89,10 +93,10 @@ function Zombie:update(dt)
     if self.animation == self.animations.attack then
         self:updateAttack(distance)
     elseif distance > REACH then
-        self.angle = math.atan2(dy, dx)
-        -- Still straight at the target, so walls in between stop it
-        local step = SPEED * dt / distance
-        self.x, self.y = self.map:pushOut(self.x + dx * step, self.y + dy * step, self.radius)
+        local dirX, dirY = self:walkDirection(dx / distance, dy / distance, distance)
+        self.angle = math.atan2(dirY, dirX)
+        local step = SPEED * dt
+        self.x, self.y = self.map:pushOut(self.x + dirX * step, self.y + dirY * step, self.radius)
         self:switchTo(self.animations.move)
     else
         -- The swing keeps the angle it started with
@@ -102,6 +106,36 @@ function Zombie:update(dt)
     end
 
     self.animation:update(dt)
+end
+
+-- Whether the whole body fits a straight walk to the target: rays from its center and both sides
+function Zombie:hasClearPath(dirX, dirY, distance)
+    for _, side in ipairs(BODY_SIDES) do
+        local offsetX, offsetY = -dirY * side * self.radius, dirX * side * self.radius
+        if self.map:castRay(self.x + offsetX, self.y + offsetY, dirX, dirY, distance) then
+            return false
+        end
+    end
+    return true
+end
+
+-- Straight at the target when nothing is in the way; otherwise along the flow field, around the walls
+-- dirX, dirY: the unit vector to the target
+function Zombie:walkDirection(dirX, dirY, distance)
+    if self:hasClearPath(dirX, dirY, distance) then
+        return dirX, dirY
+    end
+
+    local stepX, stepY = self.flowField:nextStep(self.x, self.y)
+    if not stepX then
+        return dirX, dirY
+    end
+    local dx, dy = stepX - self.x, stepY - self.y
+    local length = math.sqrt(dx * dx + dy * dy)
+    if length == 0 then
+        return dirX, dirY
+    end
+    return dx / length, dy / length
 end
 
 -- Lands the hit once per swing and chases again when the swing ends

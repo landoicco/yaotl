@@ -1,18 +1,27 @@
--- Darkness over the scene, lifted where lights shine
+-- Darkness over the scene, lifted where lights shine (see docs/adr/0003-lighting.md)
 -- Lights add up in a lightmap, which then multiplies the scene below it
 local Lighting = {}
 Lighting.__index = Lighting
 
 local SHADER_PATH = "assets/shaders/light.glsl"
--- Points along the edge of a light's area
+-- Points along the edge of a light's area where no wall stops it
 local ARC_SEGMENTS = 32
+-- Rays aimed just beside each wall corner, in radians, to see past it
+local CORNER_OFFSET = 0.0001
+-- How far light goes into a wall, in pixels, so the edges of the walls show
+local WALL_BLEED = 6
+-- Most vertices a light's area can have
+local MAX_VERTICES = 4096
 
--- ambient: the color of the darkness, { r, g, b }
-function Lighting.new(ambient)
+-- ambient: the color of the darkness, { r, g, b }; map: the walls that block the light
+function Lighting.new(ambient, map)
     local self = setmetatable({}, Lighting)
     self.ambient = ambient
+    self.map = map
     self.canvas = love.graphics.newCanvas()
     self.shader = love.graphics.newShader(SHADER_PATH)
+    -- A fan from the light, so a concave area fills correctly
+    self.mesh = love.graphics.newMesh({ { "VertexPosition", "float", 2 } }, MAX_VERTICES, "fan", "stream")
     return self
 end
 
@@ -21,22 +30,48 @@ local function isPoint(light)
     return light.outerAngle >= math.pi
 end
 
--- Polygon a light can reach, starting at the light so it fills as a fan
--- The only place that decides what is lit: walls will clip this area
-function Lighting.litArea(light)
-    local points = { light.x, light.y }
-    local from = light.angle - light.outerAngle
-    local to = light.angle + light.outerAngle
-    if isPoint(light) then
-        from, to = 0, 2 * math.pi
+-- Wrap an angle to the range [-pi, pi)
+local function normalizeAngle(angle)
+    return (angle + math.pi) % (2 * math.pi) - math.pi
+end
+
+-- Angles of the rays to cast, relative to the light's direction and sorted:
+-- evenly spaced along the light's edge, plus one at and beside every wall corner in reach
+function Lighting:rayAngles(light, halfWidth)
+    local angles = {}
+    for i = 0, ARC_SEGMENTS do
+        table.insert(angles, -halfWidth + 2 * halfWidth * i / ARC_SEGMENTS)
     end
 
-    for i = 0, ARC_SEGMENTS do
-        local angle = from + (to - from) * i / ARC_SEGMENTS
-        table.insert(points, light.x + math.cos(angle) * light.range)
-        table.insert(points, light.y + math.sin(angle) * light.range)
+    for _, corner in ipairs(self.map:cornersNear(light.x, light.y, light.range)) do
+        local angle = normalizeAngle(math.atan2(corner.y - light.y, corner.x - light.x) - light.angle)
+        for _, aimed in ipairs({ angle - CORNER_OFFSET, angle, angle + CORNER_OFFSET }) do
+            if math.abs(aimed) < halfWidth then
+                table.insert(angles, aimed)
+            end
+        end
     end
-    return points
+
+    table.sort(angles)
+    return angles
+end
+
+-- Area a light reaches, as the vertices of a fan that starts at the light
+-- The only place that decides what is lit: rays stop a little into the first wall they meet
+function Lighting:litArea(light)
+    local halfWidth = isPoint(light) and math.pi or light.outerAngle
+    local vertices = { { light.x, light.y } }
+    for _, relative in ipairs(self:rayAngles(light, halfWidth)) do
+        local angle = light.angle + relative
+        local dirX, dirY = math.cos(angle), math.sin(angle)
+        local distance = light.range
+        local wallDistance = self.map:castRay(light.x, light.y, dirX, dirY, light.range)
+        if wallDistance then
+            distance = math.min(wallDistance + WALL_BLEED, light.range)
+        end
+        table.insert(vertices, { light.x + dirX * distance, light.y + dirY * distance })
+    end
+    return vertices
 end
 
 -- The camera only moves the view, so direction and range need no conversion, only the origin
@@ -54,9 +89,14 @@ function Lighting:drawLight(light)
         shader:send("outerCos", math.cos(light.outerAngle))
     end
 
+    local vertices = self:litArea(light)
+    assert(#vertices <= MAX_VERTICES, "too many wall corners around a light")
+    self.mesh:setVertices(vertices)
+    self.mesh:setDrawRange(1, #vertices)
+
     local r, g, b = unpack(light.color)
     love.graphics.setColor(r * light.intensity, g * light.intensity, b * light.intensity)
-    love.graphics.polygon("fill", Lighting.litArea(light))
+    love.graphics.draw(self.mesh)
 end
 
 -- Darken everything drawn so far, except where the lights reach

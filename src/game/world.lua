@@ -54,8 +54,8 @@ function World.new()
     local self = setmetatable({}, World)
     self.bullets = {}
     self.zombies = {}
-    self.lighting = Lighting.new(AMBIENT)
     self.map = Map.load("sandbox")
+    self.lighting = Lighting.new(AMBIENT, self.map)
 
     local spawn = self.map.playerSpawn
     self.player = Player.new(spawn.x, spawn.y, self.map, function(x, y, angle)

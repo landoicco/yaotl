@@ -177,10 +177,20 @@ function Player:takeHit()
 end
 
 -- World position of a point on the torso sprite, rotated with the aim
+-- The lens and the muzzle reach past the body, so against a wall they could poke through it:
+-- a point beyond a wall is pulled back to just in front of it
 function Player:torsoPoint(spriteX, spriteY)
     local cos, sin = math.cos(self.aimAngle), math.sin(self.aimAngle)
     local offsetX, offsetY = spriteX * SCALE, spriteY * SCALE
-    return self.x + offsetX * cos - offsetY * sin, self.y + offsetX * sin + offsetY * cos
+    local dx, dy = offsetX * cos - offsetY * sin, offsetX * sin + offsetY * cos
+
+    local length = math.sqrt(dx * dx + dy * dy)
+    local wallDistance = self.map:castRay(self.x, self.y, dx / length, dy / length, length)
+    if wallDistance then
+        local scale = math.max(wallDistance - 1, 0) / length
+        dx, dy = dx * scale, dy * scale
+    end
+    return self.x + dx, self.y + dy
 end
 
 function Player:equip(weaponName)

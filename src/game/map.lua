@@ -210,6 +210,37 @@ function Map:castRay(x, y, dirX, dirY, maxDistance)
     end
 end
 
+-- Whether the grid point at the top-left of a cell is a corner of the walls:
+-- one or three of the four cells around it are walls, or two that touch only diagonally
+-- Points along a straight wall are not corners: a light never needs a ray aimed at them
+function Map:isCorner(column, row)
+    local topLeft = self:isWall(column - 1, row - 1)
+    local topRight = self:isWall(column, row - 1)
+    local bottomLeft = self:isWall(column - 1, row)
+    local bottomRight = self:isWall(column, row)
+    local walls = (topLeft and 1 or 0) + (topRight and 1 or 0) + (bottomLeft and 1 or 0) + (bottomRight and 1 or 0)
+    if walls == 2 then
+        return topLeft == bottomRight
+    end
+    return walls == 1 or walls == 3
+end
+
+-- Wall corners within a distance of a point, as { x, y } in pixels
+function Map:cornersNear(x, y, distance)
+    local size = self.tileSize
+    local corners = {}
+    for row = math.ceil((y - distance) / size), math.floor((y + distance) / size) do
+        for column = math.ceil((x - distance) / size), math.floor((x + distance) / size) do
+            local cornerX, cornerY = column * size, row * size
+            local dx, dy = cornerX - x, cornerY - y
+            if dx * dx + dy * dy <= distance * distance and self:isCorner(column, row) then
+                table.insert(corners, { x = cornerX, y = cornerY })
+            end
+        end
+    end
+    return corners
+end
+
 -- Add the map's fixed lights
 function Map:addLights(lights)
     for _, lamp in ipairs(self.lights) do

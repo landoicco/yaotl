@@ -39,3 +39,4 @@ Other rules:
 - **Orthogonal, fixed size, 32 × 32 tiles.** Infinite maps are not supported.
 - **One tileset, embedded in the map**, with its image in `assets/maps/`.
 - **Objects are placed in pixels**, tiles in cells. The loader converts between them.
+- **Walls must not touch only at a corner.** The gap between two diagonal walls has no width, and light and movement could slip through it ([ADR 0003](../docs/adr/0003-lighting.md)).

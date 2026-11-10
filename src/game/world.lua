@@ -102,6 +102,7 @@ function World:draw()
     self.player:draw()
 
     local lights = {}
+    self.map:addLights(lights)
     self.player:addLights(lights)
     self.lighting:draw(lights)
 

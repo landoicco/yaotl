@@ -1,5 +1,5 @@
 -- A map made in Tiled and exported to Lua (see maps/README.md)
--- The layer names are the contract with the editor: floor, walls, spawns
+-- The layer names are the contract with the editor: floor, walls, spawns, lights
 local Map = {}
 Map.__index = Map
 
@@ -12,6 +12,28 @@ local function findLayer(data, name, layerType)
         end
     end
     error(string.format("map has no %s layer named '%s'", layerType, name))
+end
+
+-- Tiled writes colors as "#AARRGGBB"; lights only use the RGB part
+local function parseColor(hex)
+    local r, g, b = hex:match("^#%x%x(%x%x)(%x%x)(%x%x)$")
+    assert(r, "unexpected color format: " .. hex)
+    return { tonumber(r, 16) / 255, tonumber(g, 16) / 255, tonumber(b, 16) / 255 }
+end
+
+-- A lamp: a point light with the fields Lighting expects
+local function newLamp(object)
+    local properties = object.properties
+    return {
+        x = object.x,
+        y = object.y,
+        angle = 0,
+        range = properties.range,
+        innerAngle = math.pi,
+        outerAngle = math.pi,
+        color = parseColor(properties.color),
+        intensity = properties.intensity,
+    }
 end
 
 -- One quad per tile of the tileset, indexed by its global id
@@ -72,6 +94,13 @@ function Map.load(name)
         end
     end
     assert(self.playerSpawn, "map has no player spawn")
+
+    self.lights = {}
+    for _, object in ipairs(findLayer(data, "lights", "objectgroup").objects) do
+        if object.name == "lamp" then
+            table.insert(self.lights, newLamp(object))
+        end
+    end
 
     return self
 end
@@ -178,6 +207,13 @@ function Map:castRay(x, y, dirX, dirY, maxDistance)
         if self:isWall(column, row) then
             return distance
         end
+    end
+end
+
+-- Add the map's fixed lights
+function Map:addLights(lights)
+    for _, lamp in ipairs(self.lights) do
+        table.insert(lights, lamp)
     end
 end
 

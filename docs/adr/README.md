@@ -10,3 +10,4 @@ Records are numbered in order and never deleted. A decision that changes gets a 
 | [0002](0002-shared-weapon-states.md) | One set of states for every weapon | Accepted |
 | [0003](0003-lighting.md) | Lighting: a lightmap of visibility polygons | Accepted |
 | [0004](0004-zombie-navigation.md) | Zombie navigation: a shared flow field and a straight walk when the way is clear | Accepted |
+| [0005](0005-melee-states.md) | Melee as a substate of whatever is held | Accepted |

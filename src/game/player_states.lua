@@ -1,5 +1,6 @@
 -- Player states, a hierarchical state machine (see docs/adr/0001-player-state-machine.md)
 -- The weapon states serve every weapon (see docs/adr/0002-shared-weapon-states.md)
+-- Melee strikes are substates of whatever is held (see docs/adr/0005-melee-states.md)
 -- Each state implements: enter, update, keypressed, mousepressed, torso
 local states = {}
 

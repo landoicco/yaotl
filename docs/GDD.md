@@ -25,6 +25,9 @@ The scope stays small, so that everything in the game is finished and polished.
 ## 3. Player
 
 - Moves with WASD. The torso faces the mouse cursor and the feet follow the movement: walking, walking backwards or strafing.
+- The torso turns at a capped speed, so turning around takes a moment, and it ignores the mouse when the cursor is right over the player.
+- Runs while holding `Shift`. Running is for fleeing: the torso faces the way ahead, so the flashlight lights the path, and the player cannot shoot or strike until they slow down.
+- Strikes with whatever is held, with a right click: a punch with the flashlight, a blow with a weapon's butt. A strike hurts the zombies right in front, throws them back and cuts their swing short. It is a way out, not a way to kill: it works without ammo or battery.
 - Starts with only the flashlight.
 - Holds one thing at a time: the flashlight or a weapon.
 - `Q` switches between the flashlight and the last weapon used, so choosing between light and defense takes a single key.
@@ -53,6 +56,7 @@ The scope stays small, so that everything in the game is finished and polished.
 - A zombie takes three handgun shots to kill, and fades out when it dies.
 - Up close, a zombie swings at the player. Stepping back before the arms close dodges the hit.
 - Zombies are slower than the player, so running away is always an option.
+- A strike throws a zombie back and leaves it reeling for a moment.
 - They navigate toward the player using a flow field, and walk straight at them when nothing is in the way ([ADR 0004](adr/0004-zombie-navigation.md)).
 
 ## 7. World
@@ -72,7 +76,7 @@ The scope stays small, so that everything in the game is finished and polished.
 
 | Pattern | Where | Decision |
 |---|---|---|
-| State (hierarchical) | Player states, shared by every weapon | [ADR 0001](adr/0001-player-state-machine.md), [ADR 0002](adr/0002-shared-weapon-states.md) |
+| State (hierarchical) | Player states, shared by every weapon | [ADR 0001](adr/0001-player-state-machine.md), [ADR 0002](adr/0002-shared-weapon-states.md), [ADR 0005](adr/0005-melee-states.md) |
 | Update Method | The world updates every entity and removes the dead ones | — |
 | Flyweight | Animation frames are shared by every instance of a spritesheet | — |
 

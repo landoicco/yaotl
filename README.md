@@ -65,8 +65,10 @@ stylua --check .  # or `stylua .` to format
 | Action | Input |
 |---|---|
 | Move | `W` `A` `S` `D` |
+| Run | `Shift` (hold) |
 | Aim | Mouse |
 | Shoot | Left click |
+| Strike | Right click |
 | Reload | `R` |
 | Switch between the flashlight and the last weapon | `Q` |
 | Take out the handgun / shotgun | `1` / `2` |

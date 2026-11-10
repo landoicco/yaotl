@@ -9,6 +9,7 @@ local Player = {}
 Player.__index = Player
 
 local SPEED = 150 -- pixels per second
+local RUN_SPEED = 240
 local HEALTH = 5 -- zombie hits to kill
 -- Body size against walls, in pixels after scaling
 local RADIUS = 18
@@ -87,6 +88,13 @@ local ANIMATIONS = {
         frameWidth = 172, frameHeight = 124, frameCount = 20,
         originX = 86, originY = 62,
     },
+    -- Faster than the walk, so the longer strides keep up with the speed
+    feetRun = {
+        sheet = "feet_run.png",
+        frameWidth = 204, frameHeight = 124, frameCount = 20,
+        originX = 102, originY = 62,
+        fps = 20,
+    },
     feetStrafeLeft = {
         sheet = "feet_strafe_left.png",
         frameWidth = 155, frameHeight = 174, frameCount = 20,
@@ -157,6 +165,7 @@ function Player.new(x, y, map, spawnBullet)
     self.feetAngle = 0
     self.feetReversed = false
     self.isMoving = false
+    self.isRunning = false
 
     self.animations = Animation.newSet(ANIMATIONS)
 
@@ -231,8 +240,11 @@ function Player:keypressed(key)
     self.state.keypressed(self, key)
 end
 
+-- Running is for fleeing: the hands do nothing until the player slows down
 function Player:mousepressed(button)
-    self.state.mousepressed(self, button)
+    if not self.isRunning then
+        self.state.mousepressed(self, button)
+    end
 end
 
 -- aimX, aimY: the world point the torso faces, usually under the mouse
@@ -255,13 +267,18 @@ function Player:update(dt, aimX, aimY)
     -- Normalize so diagonal movement is not faster
     local length = math.sqrt(dirX * dirX + dirY * dirY)
     self.isMoving = length > 0
+    self.isRunning = self.isMoving and (love.keyboard.isDown("lshift") or love.keyboard.isDown("rshift"))
+    local moveAngle = math.atan2(dirY, dirX)
     if self.isMoving then
-        local step = SPEED * dt / length
+        local step = (self.isRunning and RUN_SPEED or SPEED) * dt / length
         self.x, self.y = self.map:pushOut(self.x + dirX * step, self.y + dirY * step, RADIUS)
     end
 
+    -- Running faces the way ahead; otherwise the torso follows the aim
     local aimDX, aimDY = aimX - self.x, aimY - self.y
-    if aimDX * aimDX + aimDY * aimDY > AIM_DEAD_ZONE * AIM_DEAD_ZONE then
+    if self.isRunning then
+        self:turnToward(moveAngle, dt)
+    elseif aimDX * aimDX + aimDY * aimDY > AIM_DEAD_ZONE * AIM_DEAD_ZONE then
         self:turnToward(math.atan2(aimDY, aimDX), dt)
     end
 
@@ -269,8 +286,13 @@ function Player:update(dt, aimX, aimY)
     self.state.update(self, dt)
     self.torso = Animation.switch(self.torso, self.animations[self.state.torso(self)])
 
-    if self.isMoving then
-        self:updateFeet(math.atan2(dirY, dirX))
+    if self.isRunning then
+        -- The run only has a forward animation
+        self.feet = Animation.switch(self.feet, self.animations.feetRun)
+        self.feetAngle = moveAngle
+        self.feetReversed = false
+    elseif self.isMoving then
+        self:updateFeet(moveAngle)
     else
         self.feet = Animation.switch(self.feet, self.animations.feetIdle)
         self.feetAngle = self.aimAngle

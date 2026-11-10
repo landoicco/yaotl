@@ -124,6 +124,11 @@ local WEAPONS = {
 local FORWARD_LIMIT = math.pi / 4
 local BACKWARD_LIMIT = 3 * math.pi / 4
 
+-- Fastest the torso turns toward the aim, so turning around takes a moment
+local TURN_SPEED = math.rad(600) -- radians per second
+-- Close to the player, small mouse moves swing the aim wildly: inside this distance it is ignored
+local AIM_DEAD_ZONE = 30 -- pixels
+
 -- Shared by every player
 Animation.loadDefinitions(SHEETS_DIR, ANIMATIONS, DEFAULT_FPS)
 
@@ -255,7 +260,10 @@ function Player:update(dt, aimX, aimY)
         self.x, self.y = self.map:pushOut(self.x + dirX * step, self.y + dirY * step, RADIUS)
     end
 
-    self.aimAngle = math.atan2(aimY - self.y, aimX - self.x)
+    local aimDX, aimDY = aimX - self.x, aimY - self.y
+    if aimDX * aimDX + aimDY * aimDY > AIM_DEAD_ZONE * AIM_DEAD_ZONE then
+        self:turnToward(math.atan2(aimDY, aimDX), dt)
+    end
 
     -- The state decides what the torso does
     self.state.update(self, dt)
@@ -276,6 +284,13 @@ function Player:update(dt, aimX, aimY)
     self.flashlight:place(lensX, lensY, self.aimAngle, self.x, self.y)
     self.flashlight:update(dt, self:isHoldingFlashlight())
     self.muzzleFlash:update(dt)
+end
+
+-- Turn the torso toward an angle, the short way round and no faster than TURN_SPEED
+function Player:turnToward(angle, dt)
+    local difference = normalizeAngle(angle - self.aimAngle)
+    local maxTurn = TURN_SPEED * dt
+    self.aimAngle = normalizeAngle(self.aimAngle + math.max(-maxTurn, math.min(difference, maxTurn)))
 end
 
 -- Feet animation and angle from the movement relative to the aim

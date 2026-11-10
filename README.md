@@ -47,6 +47,10 @@ Every pull request builds the game for Windows and Linux; the builds are under t
 nix shell nixpkgs#zip nixpkgs#unzip nixpkgs#squashfsTools --command tools/build.sh
 ```
 
+## 🗺️ Editing maps
+
+Maps are made in [Tiled](https://www.mapeditor.org/), which comes with the Nix dev shell. See [`maps/README.md`](maps/README.md) for how to edit and export them, and the layers the game expects.
+
 ## 🔍 Checking the code
 
 CI rejects code that fails [luacheck](https://github.com/lunarmodules/luacheck) or [StyLua](https://github.com/JohnnyMorganz/StyLua). Both come with the Nix dev shell, at the same versions CI uses:

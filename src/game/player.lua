@@ -10,6 +10,8 @@ Player.__index = Player
 
 local SPEED = 150 -- pixels per second
 local HEALTH = 5 -- zombie hits to kill
+-- Body size against walls, in pixels after scaling
+local RADIUS = 18
 local SCALE = 0.35
 local DEFAULT_FPS = 15
 
@@ -130,11 +132,12 @@ local function normalizeAngle(angle)
     return (angle + math.pi) % (2 * math.pi) - math.pi
 end
 
--- spawnBullet(x, y, angle) is called on every shot
-function Player.new(x, y, spawnBullet)
+-- map: the walls the player cannot cross; spawnBullet(x, y, angle) is called on every shot
+function Player.new(x, y, map, spawnBullet)
     local self = setmetatable({}, Player)
     self.x = x
     self.y = y
+    self.map = map
     self.spawnBullet = spawnBullet
     self.health = HEALTH
     self.weapons = {
@@ -217,7 +220,8 @@ function Player:mousepressed(button)
     self.state.mousepressed(self, button)
 end
 
-function Player:update(dt)
+-- aimX, aimY: the world point the torso faces, usually under the mouse
+function Player:update(dt, aimX, aimY)
     -- Build the movement direction from the pressed keys
     local dirX, dirY = 0, 0
     if love.keyboard.isDown("w") then
@@ -237,13 +241,11 @@ function Player:update(dt)
     local length = math.sqrt(dirX * dirX + dirY * dirY)
     self.isMoving = length > 0
     if self.isMoving then
-        self.x = self.x + dirX / length * SPEED * dt
-        self.y = self.y + dirY / length * SPEED * dt
+        local step = SPEED * dt / length
+        self.x, self.y = self.map:pushOut(self.x + dirX * step, self.y + dirY * step, RADIUS)
     end
 
-    -- The torso faces the mouse cursor
-    local mouseX, mouseY = love.mouse.getPosition()
-    self.aimAngle = math.atan2(mouseY - self.y, mouseX - self.x)
+    self.aimAngle = math.atan2(aimY - self.y, aimX - self.x)
 
     -- The state decides what the torso does
     self.state.update(self, dt)

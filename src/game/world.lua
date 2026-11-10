@@ -1,6 +1,8 @@
 local Player = require("src.game.player")
 local Bullet = require("src.game.bullet")
+local Camera = require("src.game.camera")
 local Lighting = require("src.game.lighting")
+local Map = require("src.game.map")
 local Zombie = require("src.game.zombie")
 
 -- A match: the player and every entity around it
@@ -53,30 +55,36 @@ function World.new()
     self.bullets = {}
     self.zombies = {}
     self.lighting = Lighting.new(AMBIENT)
+    self.map = Map.load("sandbox")
 
-    local width, height = love.graphics.getDimensions()
-    self.player = Player.new(width / 2, height / 2, function(x, y, angle)
+    local spawn = self.map.playerSpawn
+    self.player = Player.new(spawn.x, spawn.y, self.map, function(x, y, angle)
         self:spawnBullet(x, y, angle)
     end)
 
-    -- Temporary test zombies until there is a spawner
-    self:spawnZombie(0, 0)
-    self:spawnZombie(width, 0)
-    self:spawnZombie(width / 2, height)
+    for _, zombieSpawn in ipairs(self.map.zombieSpawns) do
+        self:spawnZombie(zombieSpawn.x, zombieSpawn.y)
+    end
+
+    self.camera = Camera.new(self.map:getDimensions())
+    self.camera:centerOn(spawn.x, spawn.y)
 
     return self
 end
 
 function World:spawnZombie(x, y)
-    table.insert(self.zombies, Zombie.new(x, y, self.player))
+    table.insert(self.zombies, Zombie.new(x, y, self.player, self.map))
 end
 
 function World:spawnBullet(x, y, angle)
-    table.insert(self.bullets, Bullet.new(x, y, angle))
+    table.insert(self.bullets, Bullet.new(x, y, angle, self.map))
 end
 
 function World:update(dt)
-    self.player:update(dt)
+    local player = self.player
+    -- Through last frame's view, which is the one on screen
+    player:update(dt, self.camera:toWorld(love.mouse.getPosition()))
+    self.camera:follow(player.x, player.y, dt)
     updateAll(self.bullets, dt)
     resolveHits(self.bullets, self.zombies)
     updateAll(self.zombies, dt)
@@ -88,15 +96,19 @@ function World:isOver()
 end
 
 function World:draw()
+    self.camera:attach()
+    self.map:draw()
     drawAll(self.zombies)
     self.player:draw()
 
     local lights = {}
+    self.map:addLights(lights)
     self.player:addLights(lights)
     self.lighting:draw(lights)
 
     -- Tracers glow, so the darkness does not cover them
     drawAll(self.bullets)
+    self.camera:detach()
 end
 
 function World:keypressed(key)

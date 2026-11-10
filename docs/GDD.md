@@ -59,6 +59,7 @@ The scope stays small, so that everything in the game is finished and polished.
 - An unknown place made only of floors, walls and doors.
 - The map is larger than the screen, and a camera follows the player.
 - The map is built in [Tiled](https://www.mapeditor.org/) and loaded with a custom loader.
+- During development, features are tried on a sandbox map of a few rooms and corridors, separate from the level.
 
 ## 8. Technical design
 

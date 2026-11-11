@@ -1,4 +1,4 @@
-# 🧟 Yaotl
+<h1 align="center"><img src="docs/images/banner.png" alt="Yaotl, a top-down horror shooter"></h1>
 
 ![LÖVE](https://img.shields.io/badge/L%C3%96VE-11.5-e64a8b?logo=lua&logoColor=white)
 ![Lua](https://img.shields.io/badge/Lua-5.1%20%2F%20LuaJIT-2c2d72?logo=lua&logoColor=white)
@@ -92,11 +92,13 @@ Under consideration, not yet part of the design:
 
 ## 🙏 Credits
 
-All art and audio come from free third-party assets. Each one is credited here with its author, source and license.
+The art, audio and fonts are free third-party assets, except the generated sound effects. Each one is credited here with its author, source and license.
 
 | Asset | Author | Source | License |
 |---|---|---|---|
 | Survivor sprites | rileygombart | [Animated Top Down Survivor Player](https://opengameart.org/content/animated-top-down-survivor-player) | [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Zombie sprites | rileygombart | [Animated Top Down Zombie](https://opengameart.org/content/animated-top-down-zombie) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
 | Ambient track, converted to Ogg Vorbis | Jason Dagenet (jdagenet) | [Is Anybody Home?](https://opengameart.org/content/is-anybody-home) | [CC-BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
+| Banner title font: IM Fell English SC | Igino Marini | [Google Fonts](https://fonts.google.com/specimen/IM+Fell+English+SC) | [OFL 1.1](https://openfontlicense.org/) |
+| Banner subtitle font: Special Elite | Astigmatic | [Google Fonts](https://fonts.google.com/specimen/Special+Elite) | [Apache 2.0](https://www.apache.org/licenses/LICENSE-2.0) |
 | Reload sounds | Brian MacIntosh (BMacZero) | [Gun Reload Sound Effects](https://opengameart.org/content/gun-reload-sound-effects) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |

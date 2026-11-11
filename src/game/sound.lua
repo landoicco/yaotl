@@ -9,6 +9,12 @@ local DEFAULT_PITCH_VARIATION = 0.05
 -- pitchVariation: how far each play may shift the pitch, up or down, so repeats do not sound the same
 -- stylua: ignore
 local SOUNDS = {
+    handgunShot = { file = "handgun_shot.wav", volume = 1, pitchVariation = 0.08 },
+    shotgunShot = { file = "shotgun_shot.wav", volume = 1, pitchVariation = 0.08 },
+    dryFire = { file = "dry_fire.wav", volume = 0.7 },
+    meleeSwing = { file = "melee_swing.wav", volume = 0.6, pitchVariation = 0.1 },
+    meleeHit = { file = "melee_hit.wav", volume = 0.9, pitchVariation = 0.1 },
+    flashlightClick = { file = "flashlight_click.wav", volume = 0.5 },
     clipOut = { file = "clip_out.wav", volume = 0.8 },
     clipIn = { file = "clip_in.wav", volume = 0.8 },
     shellIn = { file = "shell_in.wav", volume = 0.8, pitchVariation = 0.1 },

@@ -112,6 +112,8 @@ end
 function WeaponReady.mousepressed(player, button)
     if button == SHOOT_BUTTON and player.weapon:canShoot() then
         player:changeState(states.weaponShooting)
+    elseif button == SHOOT_BUTTON then
+        player:dryFire()
     elseif button == MELEE_BUTTON then
         player:changeState(states.weaponMelee)
     end

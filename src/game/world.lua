@@ -48,8 +48,10 @@ local MELEE_RANGE = 70
 local MELEE_ARC = math.pi / 4
 
 -- Shove every living zombie in reach of a melee blow, unless a wall is in between
+-- Returns whether any zombie was hit
 function World:strike(x, y, angle)
     local cosArc = math.cos(MELEE_ARC)
+    local hitAny = false
     for _, zombie in ipairs(self.zombies) do
         local dx, dy = zombie.x - x, zombie.y - y
         local distance = math.sqrt(dx * dx + dy * dy)
@@ -58,9 +60,11 @@ function World:strike(x, y, angle)
             local isInFront = dirX * math.cos(angle) + dirY * math.sin(angle) >= cosArc
             if isInFront and not self.map:castRay(x, y, dirX, dirY, distance) then
                 zombie:shove(dirX, dirY)
+                hitAny = true
             end
         end
     end
+    return hitAny
 end
 
 local function drawAll(entities)
@@ -84,7 +88,7 @@ function World.new()
     self.player = Player.new(spawn.x, spawn.y, self.map, function(x, y, angle)
         self:spawnBullet(x, y, angle)
     end, function(x, y, angle)
-        self:strike(x, y, angle)
+        return self:strike(x, y, angle)
     end)
 
     for _, zombieSpawn in ipairs(self.map.zombieSpawns) do

@@ -2,6 +2,7 @@ local Animation = require("src.engine.animation")
 local Flashlight = require("src.game.flashlight")
 local MuzzleFlash = require("src.game.muzzle_flash")
 local states = require("src.game.player_states")
+local Sound = require("src.game.sound")
 local Weapon = require("src.game.weapon")
 
 -- The survivor: the torso aims at the mouse, the feet follow the movement
@@ -32,24 +33,25 @@ local ANIMATIONS = {
         originX = 95, originY = 120,
     },
     -- Melee strikes: 15 frames at 20 fps = 0.75 s; hitFrame is where the blow lands
+    -- sounds: the sound each frame plays as the animation enters it; the swing builds up to the hit
     -- With the flashlight, the free hand punches
     flashlightMelee = {
         sheet = "flashlight_melee.png",
         frameWidth = 316, frameHeight = 246, frameCount = 15,
         originX = 101, originY = 144,
-        fps = 20, loops = false, hitFrame = 9,
+        fps = 20, loops = false, hitFrame = 9, sounds = { [6] = "meleeSwing" },
     },
     handgunMelee = {
         sheet = "handgun_melee.png",
         frameWidth = 291, frameHeight = 256, frameCount = 15,
         originX = 117, originY = 124,
-        fps = 20, loops = false, hitFrame = 8,
+        fps = 20, loops = false, hitFrame = 8, sounds = { [5] = "meleeSwing" },
     },
     shotgunMelee = {
         sheet = "shotgun_melee.png",
         frameWidth = 358, frameHeight = 353, frameCount = 15,
         originX = 132, originY = 199,
-        fps = 20, loops = false, hitFrame = 9,
+        fps = 20, loops = false, hitFrame = 9, sounds = { [6] = "meleeSwing" },
     },
     handgunIdle = {
         sheet = "handgun_idle.png",
@@ -67,12 +69,12 @@ local ANIMATIONS = {
         originX = 110, originY = 120,
         fps = 20, loops = false,
     },
-    -- Sets the reload time: 15 frames at 15 fps = 1 s
+    -- Sets the reload time: 15 frames at 15 fps = 1 s; the sounds play when the hand reaches the gun
     handgunReload = {
         sheet = "handgun_reload.png",
         frameWidth = 260, frameHeight = 230, frameCount = 15,
         originX = 110, originY = 120,
-        loops = false,
+        loops = false, sounds = { [3] = "clipOut", [13] = "clipIn" },
     },
     shotgunIdle = {
         sheet = "shotgun_idle.png",
@@ -91,12 +93,12 @@ local ANIMATIONS = {
         originX = 112, originY = 118,
         fps = 6, loops = false,
     },
-    -- 20 frames at 15 fps = 1.33 s
+    -- 20 frames at 15 fps = 1.33 s; the rounds go in all at once, but it sounds like shells one by one
     shotgunReload = {
         sheet = "shotgun_reload.png",
         frameWidth = 322, frameHeight = 217, frameCount = 20,
         originX = 116, originY = 119,
-        loops = false,
+        loops = false, sounds = { [5] = "shellIn", [8] = "shellIn", [12] = "shellIn" },
     },
     feetIdle = {
         sheet = "feet_idle.png",
@@ -131,20 +133,21 @@ local ANIMATIONS = {
 local LENS_X, LENS_Y = 200, -16
 
 -- name matches the animations' prefix; spread is the half-angle of the pellets, in radians;
--- flashSize scales the muzzle flash; the muzzle is in sprite pixels from the origin
+-- flashSize scales the muzzle flash; the muzzle is in sprite pixels from the origin;
+-- shotSound is the name of the sound each shot plays
 -- stylua: ignore
 local WEAPONS = {
     handgun = {
         name = "handgun", label = "Handgun",
         magazineSize = 12, reserve = 36,
         pellets = 1, spread = 0, flashSize = 1,
-        muzzleX = 133, muzzleY = 38,
+        muzzleX = 133, muzzleY = 38, shotSound = "handgunShot",
     },
     shotgun = {
         name = "shotgun", label = "Shotgun",
         magazineSize = 6, reserve = 18,
         pellets = 7, spread = 0.15, flashSize = 1.6,
-        muzzleX = 181, muzzleY = 34,
+        muzzleX = 181, muzzleY = 34, shotSound = "shotgunShot",
     },
 }
 
@@ -165,8 +168,18 @@ local function normalizeAngle(angle)
     return (angle + math.pi) % (2 * math.pi) - math.pi
 end
 
+-- Play the sounds of the frames the animation just entered
+local function playFrameSounds(animation)
+    for frame, name in pairs(animation.definition.sounds or {}) do
+        if animation:enteredFrame(frame) then
+            Sound.play(name)
+        end
+    end
+end
+
 -- map: the walls the player cannot cross
--- spawnBullet(x, y, angle) is called on every shot, strike(x, y, angle) when a melee blow lands
+-- spawnBullet(x, y, angle) is called on every shot, strike(x, y, angle) when a melee blow lands;
+-- strike returns whether the blow hit anything
 function Player.new(x, y, map, spawnBullet, strike)
     local self = setmetatable({}, Player)
     self.x = x
@@ -195,6 +208,8 @@ function Player.new(x, y, map, spawnBullet, strike)
 
     -- The player starts with the flashlight out
     self:changeState(states.flashlight)
+    -- The flashlight clicks when it is taken out or put away, not when the game starts
+    self.wasHoldingFlashlight = true
     self.torso = self.animations[self.state.torso(self)]
     self.feet = self.animations.feetIdle
 
@@ -245,6 +260,12 @@ function Player:shoot()
         self.spawnBullet(x, y, self.aimAngle + offset)
     end
     self.muzzleFlash:fire(x, y, stats.flashSize)
+    Sound.play(stats.shotSound)
+end
+
+-- Pulling the trigger on an empty magazine
+function Player:dryFire()
+    Sound.play("dryFire")
 end
 
 function Player:startMelee()
@@ -257,7 +278,9 @@ function Player:updateMelee()
     local hitFrame = self.torso.definition.hitFrame
     if not self.hasStruck and hitFrame and self.torso:frameIndex() >= hitFrame then
         self.hasStruck = true
-        self.strike(self.x, self.y, self.aimAngle)
+        if self.strike(self.x, self.y, self.aimAngle) then
+            Sound.play("meleeHit")
+        end
     end
 end
 
@@ -340,6 +363,13 @@ function Player:update(dt, aimX, aimY)
 
     self.torso:update(dt)
     self.feet:update(self.feetReversed and -dt or dt)
+    playFrameSounds(self.torso)
+
+    local isHoldingFlashlight = self:isHoldingFlashlight()
+    if isHoldingFlashlight ~= self.wasHoldingFlashlight then
+        Sound.play("flashlightClick")
+        self.wasHoldingFlashlight = isHoldingFlashlight
+    end
 
     local lensX, lensY = self:torsoPoint(LENS_X, LENS_Y)
     self.flashlight:place(lensX, lensY, self.aimAngle, self.x, self.y)

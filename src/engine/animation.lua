@@ -20,7 +20,7 @@ function Animation.new(definition)
     local self = setmetatable({}, Animation)
     self.definition = definition
     self.loops = definition.loops ~= false
-    self.time = 0
+    self:reset()
 
     -- Flyweight: frames are built once and shared by every instance of the definition
     definition.frames = definition.frames or buildFrames(definition)
@@ -58,9 +58,15 @@ end
 
 -- A negative dt plays the animation backwards
 function Animation:update(dt)
+    -- Right after a reset, the update starts just before the first frame, so it enters it
+    self.previousTime = self.restarted and -1 or self.time
+    self.restarted = false
+    self.forward = dt > 0
     if self.loops then
         -- Wrap to the loop length; Lua's % keeps it positive when dt < 0
-        self.time = (self.time + dt) % self.duration
+        local time = self.time + dt
+        self.wrapped = time >= self.duration or time < 0
+        self.time = time % self.duration
     else
         self.time = math.min(self.time + dt, self.duration)
     end
@@ -69,6 +75,20 @@ end
 -- Restart from the first frame
 function Animation:reset()
     self.time = 0
+    self.restarted = true
+    self.wrapped = false
+end
+
+-- True if the last update entered the frame, playing forward; for things tied to a frame, like sounds
+function Animation:enteredFrame(index)
+    if not self.forward then
+        return false
+    end
+    local start = (index - 1) / self.definition.fps
+    if self.wrapped then
+        return start > self.previousTime or start <= self.time
+    end
+    return start > self.previousTime and start <= self.time
 end
 
 -- True once a non-looping animation reaches its end

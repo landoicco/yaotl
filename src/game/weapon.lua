@@ -2,7 +2,7 @@
 local Weapon = {}
 Weapon.__index = Weapon
 
--- stats: name, label, magazineSize, reserve, pellets, spread, flashSize, muzzleX, muzzleY
+-- stats: name, label, magazineSize, reserve, pellets, spread, flashSize, muzzleX, muzzleY, shotSound
 -- Starts with a full magazine
 function Weapon.new(stats)
     local self = setmetatable({}, Weapon)

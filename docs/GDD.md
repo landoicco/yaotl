@@ -107,6 +107,6 @@ Rules:
 
 ## 9. Assets
 
-- All art and audio are free third-party assets.
-- Every asset is credited in the README with its author, source and license.
+- All art and audio are free third-party assets, except some sound effects generated for the game as placeholders until better ones are found.
+- Every third-party asset is credited in the README with its author, source and license.
 - The art is kept simple: darkness, light and sound carry the mood.

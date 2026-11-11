@@ -2,6 +2,7 @@ local Animation = require("src.engine.animation")
 local Flashlight = require("src.game.flashlight")
 local MuzzleFlash = require("src.game.muzzle_flash")
 local states = require("src.game.player_states")
+local Sound = require("src.game.sound")
 local Weapon = require("src.game.weapon")
 
 -- The survivor: the torso aims at the mouse, the feet follow the movement
@@ -68,11 +69,12 @@ local ANIMATIONS = {
         fps = 20, loops = false,
     },
     -- Sets the reload time: 15 frames at 15 fps = 1 s
+    -- sounds: the sound each frame plays as the animation enters it; here, when the hand reaches the gun
     handgunReload = {
         sheet = "handgun_reload.png",
         frameWidth = 260, frameHeight = 230, frameCount = 15,
         originX = 110, originY = 120,
-        loops = false,
+        loops = false, sounds = { [3] = "clipOut", [13] = "clipIn" },
     },
     shotgunIdle = {
         sheet = "shotgun_idle.png",
@@ -91,12 +93,12 @@ local ANIMATIONS = {
         originX = 112, originY = 118,
         fps = 6, loops = false,
     },
-    -- 20 frames at 15 fps = 1.33 s
+    -- 20 frames at 15 fps = 1.33 s; the rounds go in all at once, but it sounds like shells one by one
     shotgunReload = {
         sheet = "shotgun_reload.png",
         frameWidth = 322, frameHeight = 217, frameCount = 20,
         originX = 116, originY = 119,
-        loops = false,
+        loops = false, sounds = { [5] = "shellIn", [8] = "shellIn", [12] = "shellIn" },
     },
     feetIdle = {
         sheet = "feet_idle.png",
@@ -163,6 +165,15 @@ Animation.loadDefinitions(SHEETS_DIR, ANIMATIONS, DEFAULT_FPS)
 -- Wrap an angle to the range [-pi, pi)
 local function normalizeAngle(angle)
     return (angle + math.pi) % (2 * math.pi) - math.pi
+end
+
+-- Play the sounds of the frames the animation just entered
+local function playFrameSounds(animation)
+    for frame, name in pairs(animation.definition.sounds or {}) do
+        if animation:enteredFrame(frame) then
+            Sound.play(name)
+        end
+    end
 end
 
 -- map: the walls the player cannot cross
@@ -340,6 +351,7 @@ function Player:update(dt, aimX, aimY)
 
     self.torso:update(dt)
     self.feet:update(self.feetReversed and -dt or dt)
+    playFrameSounds(self.torso)
 
     local lensX, lensY = self:torsoPoint(LENS_X, LENS_Y)
     self.flashlight:place(lensX, lensY, self.aimAngle, self.x, self.y)

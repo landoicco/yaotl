@@ -98,4 +98,5 @@ All art and audio come from free third-party assets. Each one is credited here w
 |---|---|---|---|
 | Survivor sprites | rileygombart | [Animated Top Down Survivor Player](https://opengameart.org/content/animated-top-down-survivor-player) | [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Zombie sprites | rileygombart | [Animated Top Down Zombie](https://opengameart.org/content/animated-top-down-zombie) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Ambient track, converted to Ogg Vorbis | Jason Dagenet (jdagenet) | [Is Anybody Home?](https://opengameart.org/content/is-anybody-home) | [CC-BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/) |
 | Reload sounds | Brian MacIntosh (BMacZero) | [Gun Reload Sound Effects](https://opengameart.org/content/gun-reload-sound-effects) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |

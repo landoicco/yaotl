@@ -1,3 +1,4 @@
+local Sound = require("src.game.sound")
 local World = require("src.game.world")
 
 local world
@@ -5,6 +6,8 @@ local world
 -- This function is called once at the beginning of the game
 function love.load()
     world = World.new()
+    -- Started here, so it keeps playing when the world restarts
+    Sound.playMusic("ambient")
 end
 
 -- A long frame, such as while the window is dragged, could move things past a whole wall;

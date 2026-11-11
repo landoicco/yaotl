@@ -26,6 +26,7 @@ The scope stays small, so that everything in the game is finished and polished.
 
 - Moves with WASD. The torso faces the mouse cursor and the feet follow the movement: walking, walking backwards or strafing.
 - The torso turns at a capped speed, so turning around takes a moment, and it ignores the mouse when the cursor is right over the player.
+- A crosshair takes the place of the system cursor, so the aim stays visible in the dark.
 - Runs while holding `Shift`. Running is for fleeing: the torso faces the way ahead, so the flashlight lights the path, and the player cannot shoot or strike until they slow down.
 - Strikes with whatever is held, with a right click: a punch with the flashlight, a blow with a weapon's butt. A strike hurts the zombies right in front, throws them back and cuts their swing short. It is a way out, not a way to kill: it works without ammo or battery.
 - Starts with only the flashlight.
@@ -63,6 +64,7 @@ The scope stays small, so that everything in the game is finished and polished.
 
 - An unknown place made only of floors, walls and doors.
 - The map is larger than the screen, and a camera follows the player.
+- The camera leads toward the crosshair, so more of what lies ahead is on screen. It also keeps the cursor away from the player, where turning feels even.
 - The map is built in [Tiled](https://www.mapeditor.org/) and loaded with a custom loader.
 - During development, features are tried on a sandbox map of a few rooms and corridors, separate from the level.
 

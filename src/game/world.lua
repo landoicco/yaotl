@@ -24,6 +24,9 @@ end
 -- Almost black, with a hint of blue
 local AMBIENT = { 0.02, 0.02, 0.03 }
 
+-- How far the view leads toward the mouse, as a fraction of the mouse's distance from the screen's center
+local CAMERA_LEAD = 0.25
+
 -- Bullets are points; zombies are circles
 local function isHitting(bullet, zombie)
     local dx, dy = bullet.x - zombie.x, bullet.y - zombie.y
@@ -111,9 +114,15 @@ end
 
 function World:update(dt)
     local player = self.player
+    local mouseX, mouseY = love.mouse.getPosition()
     -- Through last frame's view, which is the one on screen
-    player:update(dt, self.camera:toWorld(love.mouse.getPosition()))
-    self.camera:follow(player.x, player.y, dt)
+    player:update(dt, self.camera:toWorld(mouseX, mouseY))
+
+    -- The view leads toward the mouse, so more of what lies ahead is on screen.
+    -- Measured from the screen's center, not in the world, so the camera's own move does not feed back into it
+    local width, height = love.graphics.getDimensions()
+    local leadX, leadY = (mouseX - width / 2) * CAMERA_LEAD, (mouseY - height / 2) * CAMERA_LEAD
+    self.camera:follow(player.x + leadX, player.y + leadY, dt)
     self.flowField:update(player.x, player.y)
     updateAll(self.bullets, dt)
     resolveHits(self.bullets, self.zombies)

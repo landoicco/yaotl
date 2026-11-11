@@ -1,3 +1,4 @@
+local Crosshair = require("src.game.crosshair")
 local Sound = require("src.game.sound")
 local World = require("src.game.world")
 
@@ -8,6 +9,8 @@ function love.load()
     world = World.new()
     -- Started here, so it keeps playing when the world restarts
     Sound.playMusic("ambient")
+    -- The crosshair takes the cursor's place
+    love.mouse.setVisible(false)
 end
 
 -- A long frame, such as while the window is dragged, could move things past a whole wall;
@@ -41,4 +44,6 @@ function love.draw()
     love.graphics.print(string.format("%s: %d / %d", weapon.stats.label, weapon.magazine, weapon.reserve), 10, 10)
     love.graphics.print(string.format("Health: %d", player.health), 10, 30)
     love.graphics.print(string.format("Battery: %d%%", math.ceil(player.flashlight.charge * 100)), 10, 50)
+
+    Crosshair.draw(love.mouse.getPosition())
 end

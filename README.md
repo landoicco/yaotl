@@ -91,7 +91,7 @@ nix develop -c love tools/sfx
 
 ### 🖼️ Generating the banner
 
-[`tools/make-banner.sh`](tools/make-banner.sh) builds the banner from the game's tiles and sprites, lit like the game. The header of the script lists the two fonts it needs in `assets_local/fonts/`. Then, from the project root:
+[`tools/make-banner.sh`](tools/make-banner.sh) builds the banner and the repository's social preview (`docs/images/`) from the game's tiles and sprites, lit like the game. The social preview is uploaded by hand, under *Settings → General → Social preview*. The header of the script lists the two fonts it needs in `assets_local/fonts/`. Then, from the project root:
 
 ```bash
 nix develop -c ./tools/make-banner.sh

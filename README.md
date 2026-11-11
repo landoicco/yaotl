@@ -98,3 +98,4 @@ All art and audio come from free third-party assets. Each one is credited here w
 |---|---|---|---|
 | Survivor sprites | rileygombart | [Animated Top Down Survivor Player](https://opengameart.org/content/animated-top-down-survivor-player) | [CC-BY 3.0](https://creativecommons.org/licenses/by/3.0/) |
 | Zombie sprites | rileygombart | [Animated Top Down Zombie](https://opengameart.org/content/animated-top-down-zombie) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
+| Reload sounds | Brian MacIntosh (BMacZero) | [Gun Reload Sound Effects](https://opengameart.org/content/gun-reload-sound-effects) | [CC0](https://creativecommons.org/publicdomain/zero/1.0/) |
